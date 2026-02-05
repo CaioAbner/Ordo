@@ -20,7 +20,7 @@
         </header>
 
         <div class="d-flex flex-wrap gap-3" id="lista_boletins">
-            
+
         </div>
 
     </div>
@@ -29,6 +29,21 @@
 
     <div id="app-content"></div>
 
+    <div id="overlay" class="overlay"></div>
+    <div id="bottom-sheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-content">
+            <h5 id="sheet-title" class="mb-4 text-start">Opções</h5>
+            <button class="sheet-item" id="btn-view">
+                <i class='bx bx-show'></i> Visualizar
+            </button>
+            <button class="sheet-item text-danger" id="btn-delete-sheet">
+                <i class='bx bx-trash'></i> Excluir
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="../script/script.js"></script>
 </body>
 

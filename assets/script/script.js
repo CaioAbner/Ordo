@@ -1,5 +1,5 @@
 import { musicas } from "./musicas.js";
-import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros } from "./config.js";
+import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros, configurarPainelOpcoes } from "./config.js";
 import { edificacaoEEncerramento, infosInicias, leituraCongregacional, louvores, louvoresCeia, visitantesEOfertas } from "./etapas.js";
 import { extratoresDeDados, obterResumoOrdenado } from "./genData.js";
 
@@ -26,7 +26,6 @@ function salvarCultoFinalizado() {
 
 function renderizarBoletins() {
     const container = document.querySelector("#lista_boletins");
-
     if (!container) return;
 
     const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
@@ -38,19 +37,40 @@ function renderizarBoletins() {
 
     container.innerHTML = cultos.map(culto => {
         const stopSplit = culto.data || culto.dataCulto;
-
         if (!stopSplit) return "";
+        const tipoCulto = culto.tipo;
 
         const [ano, mes, dia] = stopSplit.split("-");
         const dataExibicao = `${dia}/${mes}/${ano.slice(-2)}`;
 
         return `
-            <div class="card-culto-flex shadow-sm" style="cursor: pointer;">
-                <span>Culto dia ${dataExibicao}</span>
+            <div class="card-culto-flex shadow-sm gap-1" style="cursor: pointer;">
+                <div class="texts-container">
+                    <span>Culto dia ${dataExibicao}</span>
+                    <h6 class="text-secondary" id="tipoCulto">(${tipoCulto})</h6>
+                </div>
+                <button class="btn btn-link text-dark btn-options" id="options-btn" data-id="${culto.id}">
+                    <i class='bx bx-dots-vertical-rounded fs-1'></i>
+                </button>
             </div>
         `;
 
     }).join("");
+
+    document.querySelectorAll(".btn-options").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+
+            configurarPainelOpcoes(id, {
+                onUpdate: renderizarBoletins,
+                onView: (id) => {
+                    import("./config.js").then(module => {
+                        module.mostrarVisualizacao(id, renderizarBoletins);
+                    });
+                }
+            });
+        });
+    });
 
 }
 

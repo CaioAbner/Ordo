@@ -6,6 +6,28 @@ export const roteiros = {
     "Celebração Dominical - Ceia": [1, 2, 3, 4, 5, 6]
 };
 
+const TRADUCOES = {
+    dirigenteGeral: "Dirigente do Culto",
+    louvoresAbertura: "Momento de Louvor",
+    dirigente: "Dirigente do Louvor",
+    leituraCongregacional: "Leitura da Palavra",
+    visitantes: "Visitantes",
+    ofertas: "Dízimos e Ofertas",
+    edificacao: "Pregação",
+    oracaoFinal: "Oração de Encerramento",
+    louvorFinal: "Cântico Final",
+    bencao: "Bênção Apostólica",
+    
+    pregador: "Mensagem",
+    referencia: "Referência Bíblica",
+    texto: "Versículos",
+    musica: "Música",
+    autor: "Autor",
+    musicaPos: "Música Final",
+    autorPos: "Autor",
+    oracaoOfertas: "Oração pelas Ofertas"
+};
+
 export function criarFormEstrutura() {
     return `
             <form class="order_form">
@@ -196,4 +218,316 @@ export function buscarMusicas(container, musicas) {
         }
     });
 
+}
+
+export function fecharSheet() {
+    const sheet = document.querySelector("#bottom-sheet");
+    const overlay = document.querySelector("#overlay");
+    if (sheet) {
+        sheet.classList.remove("active");
+        sheet.style.transform = '';
+    };
+    if (overlay) overlay.style.display = "none";
+
+    document.body.classList.remove("modal-open");
+}
+
+export function configurarPainelOpcoes(id, callbacks) {
+    const sheet = document.querySelector("#bottom-sheet");
+    const overlay = document.querySelector("#overlay");
+    const btnDelete = document.querySelector("#btn-delete-sheet");
+    const btnView = document.querySelector("#btn-view");
+    const btnPdf = document.querySelector("#btn-pdf-sheet");;
+
+    const handle = document.querySelector(".sheet-handle");
+
+    document.body.classList.add("modal-open");
+
+    let startY = 0;
+    let currentY = 0;
+
+    const onTouchStart = (e) => {
+        startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e) => {
+        e.preventDefault();
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+
+        if (deltaY > 0) {
+            sheet.style.transform = `translateY(${deltaY}px)`;
+            sheet.style.transition = 'none';
+        }
+    };
+
+    const onTouchEnd = () => {
+        const deltaY = currentY - startY;
+        sheet.style.transition = 'transform 0.3s ease';
+
+        if (deltaY > 100) {
+            fecharSheet();
+        } else {
+            sheet.style.transform = 'translateY(0)';
+        }
+
+        startY = 0;
+        currentY = 0;
+    };
+
+    handle.addEventListener("touchstart", onTouchStart);
+    handle.addEventListener("touchmove", onTouchMove);
+    handle.addEventListener("touchend", onTouchEnd);
+
+    handle.onclick = fecharSheet;
+
+    sheet.classList.add("active");
+    sheet.style.transform = "translateY(0)";
+    overlay.style.display = "block";
+    overlay.onclick = fecharSheet;
+
+    btnDelete.addEventListener("click", () => {
+        if (confirm("Deseja realmente excluir esse boletim?")) {
+            const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
+            const novosCultos = cultos.filter(culto => Number(culto.id) !== Number(id));
+            localStorage.setItem("meus_boletins", JSON.stringify(novosCultos));
+
+            fecharSheet();
+            if (callbacks.onUpdate) callbacks.onUpdate();
+        }
+    });
+
+    btnView.addEventListener("click", () => {
+        fecharSheet();
+        mostrarVisualizacao(id);
+    });
+
+    if (btnPdf) {
+        btnPdf.addEventListener("click", () => {
+            fecharSheet();
+            const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
+            const culto = cultos.find(culto => Number(culto.id) === Number(id));
+            if (culto) gerarPDFBoletim(culto);
+        });
+    }
+
+}
+
+function formatarValorVisualizacao(valor, chaveOriginal = "") {
+    if (!valor) return '<span class="text-muted small">Não informado</span>';
+
+    // Se for apenas um texto (como Dirigente Geral), coloca no card branco
+    if (typeof valor === 'string') {
+        return `
+            <div class="bg-white p-3 rounded shadow-sm mb-2 border-bottom">
+                <small class="text-uppercase text-secondary fw-bold d-block mb-1" style="font-size: 10px;">
+                    ${TRADUCOES[chaveOriginal] || chaveOriginal}
+                </small>
+                <div class="text-dark">${valor}</div>
+            </div>`;
+    }
+
+    // Se for uma música (objeto com campo musica)
+    if (typeof valor === 'object' && !Array.isArray(valor) && (valor.musica || valor.titulo)) {
+        return `
+            <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+                <div class="fw-bold text-dark">${TRADUCOES.musica}: ${valor.musica || valor.titulo}</div>
+                ${valor.autor ? `<small class="text-muted d-block">${TRADUCOES.autor}: ${valor.autor}</small>` : ''}
+                ${valor.referencia ? `
+                    <div class="mt-2 p-2 bg-light rounded fst-italic shadow-sm" style="font-size: 0.85rem;">
+                        <strong>${valor.referencia}:</strong> ${valor.texto || ''}
+                    </div>` : ''}
+            </div>`;
+    }
+
+    // Se for uma lista (ex: Louvores de Abertura)
+    if (Array.isArray(valor)) {
+        return valor.map(item => formatarValorVisualizacao(item)).join("");
+    }
+
+    // Se for um objeto complexo (ex: Ofertas ou Edificação)
+    if (typeof valor === 'object') {
+        return Object.entries(valor).map(([subChave, subValor]) => {
+            // Se o conteúdo for outra música, processa ela
+            if (typeof subValor === 'object') return formatarValorVisualizacao(subValor, subChave);
+
+            return `
+                <div class="bg-white p-3 rounded shadow-sm mb-2 border-bottom">
+                    <small class="text-uppercase text-secondary fw-bold d-block mb-1" style="font-size: 10px;">
+                        ${TRADUCOES[subChave] || subChave}
+                    </small>
+                    <div class="text-dark">${subValor}</div>
+                </div>`;
+        }).join("");
+    }
+
+    return `<span>${valor}</span>`;
+}
+
+export function mostrarVisualizacao(id) {
+    const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
+    const culto = cultos.find(c => Number(c.id) === Number(id));
+
+    if (!culto) return;
+
+    const modalRaiz = document.createElement("div");
+    modalRaiz.className = "visualizacao-full";
+
+    let conteudo = "";
+    const camposIgnorar = ["id", "tipo", "data", "dataCulto", "etapaAtual", "tipoCulto"];
+
+    Object.entries(culto).forEach(([chave, valor]) => {
+        if (camposIgnorar.includes(chave)) return;
+
+        const nomeSecao = chave.replace(/([A-Z])/g, ' $1').trim();
+
+        const labelSeção = TRADUCOES[chave] || chave;
+        conteudo += `
+            <div class="secao-container mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                    <h6 class="fw-bold text-uppercase m-0" style="font-size: 0.8rem; letter-spacing: 1.5px;">${labelSeção}</h6>
+                </div>
+                <div>${formatarValorVisualizacao(valor, chave)}</div>
+            </div>
+        `;
+    });
+
+    modalRaiz.innerHTML = `
+        <div class="header-view bg-white sticky-top shadow-sm p-3 d-flex align-items-center">
+            <button id="btn-fechar-view" class="btn btn-light rounded-circle me-3" style="width: 40px; height: 40px;">
+                <i class='bx bx-chevron-left h4 m-0'></i>
+            </button>
+            <div>
+                <h6 class="m-0 fw-bold text-dark">${culto.tipo}</h6>
+                <small class="text-muted" style="font-size: 0.7rem;">Modo de visualização</small>
+            </div>
+        </div>
+        <div class="container-fluid p-4" style="background-color: #f0f2f5; min-height: 100vh;">
+            <div class="row">
+                <div class="col-12 col-md-8 mx-auto">
+                    ${conteudo}
+                    <div class="text-center py-5">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3246/3246610.png" style="width: 40px; opacity: 0.3;">
+                        <p class="text-muted small mt-2">Fim do roteiro</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modalRaiz);
+    document.getElementById("btn-fechar-view").onclick = () => {
+        modalRaiz.classList.add("fade-out");
+        setTimeout(() => modalRaiz.remove(), 300);
+    };
+}
+
+export function gerarPDFBoletim(dados) {
+    const areaImpressao = document.createElement("div");
+    areaImpressao.className = "folha-a4";
+
+    const dataFormatada = new Date(dados.data + "T12:00:00").toLocaleDateString("pt-BR", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+    });
+
+    areaImpressao.innerHTML = `
+        <style>
+            .folha-a4 { font-family: 'Arial', sans-serif; padding: 15mm; color: #333; background: white }
+            .header-pdf { text-align: center; margin-bottom: 15px; }
+            .header-pdf h1 { color: #000; text-transform: uppercase; font-size: 22px; margin-bottom: 0; }
+            .header-pdf p { color: #0000FF; font-weight: bold; margin-top: 5px; text-transform: capitalize; }
+            .versiculo-pdf { font-style: italic; color: #0000FF; text-align: center; margin-bottom: 25px; font-size: 13px; }
+            
+            .container-colunas {
+                column-count: 2;
+                column-gap: 30px;
+                column-fill: auto;
+                height: 235mm;
+                text-align: left;
+            }
+            
+            .item-culto { 
+                margin-bottom: 15px;
+                line-height: 1.3;
+                break-inside: avoid;
+            }
+            .titulo-item { font-weight: bold; text-decoration: underline; text-transform: uppercase; display: block; margin-bottom: 2px; }
+            .musica-item { color: #D35400; font-weight: bold; display: block; margin: 4px 0; }
+            .leitura-pdf { color: #2ECC71; font-weight: bold; }
+            .texto-leitura { color: #0000FF; font-size: 12px; display: block; margin-top: 4px; }
+            .clave-sol { font-size: 16px; margin-right: 5px; }
+        </style>
+
+        <div class="header-pdf">
+            <h1>${dados.tipo}</h1>
+            <p>${dataFormatada}</p>
+        </div>
+        <div class="versiculo-pdf">
+            "Deus é Espírito, e é necessário que os seus adoradores o adorem em espírito e em verdade."
+        </div>
+
+        <div class="container-colunas">
+            ${gerarConteudoCulto(dados)}
+        </div>
+    `;
+
+    const opt = {
+        margin: 5,
+        filename: `Boletim_${dados.data}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 3, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+    };
+
+    html2pdf().set(opt).from(areaImpressao).save();
+}
+
+function gerarConteudoCulto(dados, lado) {
+    let html = "";
+    const clave = "&#119070";
+
+    html += `<div class="item-culto"><span class="titulo-item">PRELÚDIO:</span></div>`;
+    html += `<div class="item-culto"><span class="titulo-item">ORAÇÃO:</span> ${dados.dirigenteGeral || ''}</div>`;
+
+    if (dados.louvoresAbertura) {
+        dados.louvoresAbertura.forEach((m, i) => {
+            html += `
+                <div class="item-culto">
+                    <span class="musica-item">
+                        <span class="clave-sol">${clave}</span> MÚSICA ${i + 1}: ${m.musica} <span style="font-weight:normal">(${m.autor || ''})</span>
+                    </span>
+                </div>`;
+        });
+    }
+
+    if (dados.leitura) {
+        html += `
+            <div class="item-culto">
+                <span class="titulo-item">LEITURA CONGREGACIONAL:</span> 
+                <span class="leitura-pdf">${dados.leitura.referencia || ''}</span>
+                <span class="texto-leitura">${dados.leitura.texto || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.visitantes) {
+        html += `
+            <div class="item-culto">
+                <span class="musica-item"><span class="clave-sol">${clave}</span> VISITANTES: ${dados.visitantes.musica || ''}</span>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="item-culto">
+            <span class="titulo-item">MOMENTO DE EDIFICAÇÃO DA NOSSA FÉ</span>
+            <span>Mensagem: ${dados.edificacao?.pregador || ''}</span>
+        </div>
+        <div class="item-culto">
+            <span class="musica-item"><span class="clave-sol">${clave}</span> MÚSICA PÓS-MENSAGEM:</span>
+        </div>
+    `;
+
+    return html;
 }
