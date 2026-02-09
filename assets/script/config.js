@@ -1,29 +1,33 @@
 import { buscarPassagem } from "./bibleService.js";
 
 export const roteiros = {
-    "Celebração Dominical": [1, 2, 3, 4, 5],
-    "Oração e Doutrina": [1, 2, 3, 5],
-    "Celebração Dominical - Ceia": [1, 2, 3, 4, 5, 6]
+    "Celebração Dominical": [1, 2, 3, 4, 5, 6],
+    "Oração e Doutrina": [1, 2, 3, 6],
+    "Celebração Dominical - Ceia": [1, 2, 3, 4, 6, 7]
 };
 
 const TRADUCOES = {
+    data: "Data do Culto",
     dirigenteGeral: "Dirigente do Culto",
     louvoresAbertura: "Momento de Louvor",
     dirigente: "Dirigente do Louvor",
     leituraCongregacional: "Leitura da Palavra",
     visitantes: "Visitantes",
     ofertas: "Dízimos e Ofertas",
+    intercessao: "Momento de Intercessão",
+    quemOrara: "Oração Intercessória",
     edificacao: "Pregação",
     oracaoFinal: "Oração de Encerramento",
-    louvorFinal: "Cântico Final",
+    louvorFinal: "Música Final",
     bencao: "Bênção Apostólica",
-    
+
     pregador: "Mensagem",
     referencia: "Referência Bíblica",
+    leitura: "Leitura Congregacional",
     texto: "Versículos",
     musica: "Música",
     autor: "Autor",
-    musicaPos: "Música Final",
+    musicaPos: "Música Pós-Mensagem",
     autorPos: "Autor",
     oracaoOfertas: "Oração pelas Ofertas"
 };
@@ -162,6 +166,7 @@ export function configurarBuscaBiblica(container) {
                 try {
                     const textoBiblico = await buscarPassagem(textoRef.value);
                     previewDiv.innerHTML = textoBiblico;
+                    textoRef.setAttribute("data-texto", textoBiblico);
                 } catch (error) {
                     previewDiv.innerText = "Erro ao buscar passagem.";
                 }
@@ -286,7 +291,7 @@ export function configurarPainelOpcoes(id, callbacks) {
     overlay.style.display = "block";
     overlay.onclick = fecharSheet;
 
-    btnDelete.addEventListener("click", () => {
+    btnDelete.onclick = () => {
         if (confirm("Deseja realmente excluir esse boletim?")) {
             const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
             const novosCultos = cultos.filter(culto => Number(culto.id) !== Number(id));
@@ -295,28 +300,27 @@ export function configurarPainelOpcoes(id, callbacks) {
             fecharSheet();
             if (callbacks.onUpdate) callbacks.onUpdate();
         }
-    });
+    };
 
-    btnView.addEventListener("click", () => {
+    btnView.onclick = () => {
         fecharSheet();
         mostrarVisualizacao(id);
-    });
+    };
 
     if (btnPdf) {
-        btnPdf.addEventListener("click", () => {
+        btnPdf.onclick = () => {
             fecharSheet();
             const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
             const culto = cultos.find(culto => Number(culto.id) === Number(id));
             if (culto) gerarPDFBoletim(culto);
-        });
+        };
     }
 
 }
 
 function formatarValorVisualizacao(valor, chaveOriginal = "") {
-    if (!valor) return '<span class="text-muted small">Não informado</span>';
+if (!valor) return '<span class="text-muted small">Não informado</span>';
 
-    // Se for apenas um texto (como Dirigente Geral), coloca no card branco
     if (typeof valor === 'string') {
         return `
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-bottom">
@@ -327,38 +331,42 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
             </div>`;
     }
 
-    // Se for uma música (objeto com campo musica)
-    if (typeof valor === 'object' && !Array.isArray(valor) && (valor.musica || valor.titulo)) {
-        return `
+    if (typeof valor === 'object' && !Array.isArray(valor)) {
+        let htmlManual = "";
+
+        if (valor.pregador) {
+            htmlManual += formatarValorVisualizacao(valor.pregador, "pregador");
+        }
+
+        const nomeMusica = valor.musica || valor.musicaPos || valor.titulo;
+        if (nomeMusica) {
+            const nomeAutor = valor.autor || valor.autorPos;
+
+            htmlManual += `
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
-                <div class="fw-bold text-dark">${TRADUCOES.musica}: ${valor.musica || valor.titulo}</div>
-                ${valor.autor ? `<small class="text-muted d-block">${TRADUCOES.autor}: ${valor.autor}</small>` : ''}
+                <div class="text-dark">
+                    <strong>${nomeMusica} - </strong> 
+                    ${nomeAutor ? `<span class="text-muted small">(${nomeAutor})</span>` : ''}
+                </div>
                 ${valor.referencia ? `
                     <div class="mt-2 p-2 bg-light rounded fst-italic shadow-sm" style="font-size: 0.85rem;">
                         <strong>${valor.referencia}:</strong> ${valor.texto || ''}
                     </div>` : ''}
             </div>`;
+        }
+
+        Object.entries(valor).forEach(([subChave, subValor]) => {
+            const chavesJaRenderizadas = ['pregador', 'musica', 'musicaPos', 'titulo', 'autor', 'autorPos', 'referencia', 'texto'];
+            if (!chavesJaRenderizadas.includes(subChave) && subValor) {
+                htmlManual += formatarValorVisualizacao(subValor, subChave);
+            }
+        });
+
+        return htmlManual;
     }
 
-    // Se for uma lista (ex: Louvores de Abertura)
     if (Array.isArray(valor)) {
-        return valor.map(item => formatarValorVisualizacao(item)).join("");
-    }
-
-    // Se for um objeto complexo (ex: Ofertas ou Edificação)
-    if (typeof valor === 'object') {
-        return Object.entries(valor).map(([subChave, subValor]) => {
-            // Se o conteúdo for outra música, processa ela
-            if (typeof subValor === 'object') return formatarValorVisualizacao(subValor, subChave);
-
-            return `
-                <div class="bg-white p-3 rounded shadow-sm mb-2 border-bottom">
-                    <small class="text-uppercase text-secondary fw-bold d-block mb-1" style="font-size: 10px;">
-                        ${TRADUCOES[subChave] || subChave}
-                    </small>
-                    <div class="text-dark">${subValor}</div>
-                </div>`;
-        }).join("");
+        return valor.map(item => formatarValorVisualizacao(item, "musica")).join("");
     }
 
     return `<span>${valor}</span>`;
@@ -367,19 +375,21 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
 export function mostrarVisualizacao(id) {
     const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
     const culto = cultos.find(c => Number(c.id) === Number(id));
+    const dataRef = culto.data || culto.dataCulto;
+    const dataExibicao = dataRef ? dataRef.split("-").reverse().join("/") : "Data não informada."
 
     if (!culto) return;
 
     const modalRaiz = document.createElement("div");
     modalRaiz.className = "visualizacao-full";
 
+    document.body.classList.add("modal-open");
+
     let conteudo = "";
     const camposIgnorar = ["id", "tipo", "data", "dataCulto", "etapaAtual", "tipoCulto"];
 
     Object.entries(culto).forEach(([chave, valor]) => {
         if (camposIgnorar.includes(chave)) return;
-
-        const nomeSecao = chave.replace(/([A-Z])/g, ' $1').trim();
 
         const labelSeção = TRADUCOES[chave] || chave;
         conteudo += `
@@ -401,6 +411,9 @@ export function mostrarVisualizacao(id) {
             <div>
                 <h6 class="m-0 fw-bold text-dark">${culto.tipo}</h6>
                 <small class="text-muted" style="font-size: 0.7rem;">Modo de visualização</small>
+                <small class="text-primary fw-bold" style="font-size: 0.75rem;">
+                    <i class='bx bx-calendar-alt'></i> ${dataExibicao}
+                </small>
             </div>
         </div>
         <div class="container-fluid p-4" style="background-color: #f0f2f5; min-height: 100vh;">
@@ -417,9 +430,23 @@ export function mostrarVisualizacao(id) {
     `;
 
     document.body.appendChild(modalRaiz);
-    document.getElementById("btn-fechar-view").onclick = () => {
-        modalRaiz.classList.add("fade-out");
-        setTimeout(() => modalRaiz.remove(), 300);
+
+    const fecharManual = (e) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        modalRaiz.remove();
+        document.body.classList.remove("modal-open");
+        window.scrollTo(0, 0);
+        modalRaiz.style.opacity = "0";
+        modalRaiz.style.transition = "opacity 0.2s ease";
+    };
+
+    const btn = modalRaiz.querySelector("#btn-fechar-view");
+    if (btn) {
+        btn.onclick = fecharManual;
     };
 }
 

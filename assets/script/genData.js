@@ -10,11 +10,16 @@ export const extratoresDeDados = {
 
         return {
             dirigenteLouvor: document.querySelector("#dirigente_louvor")?.value,
-            louvoresAbertura: Array.from(musicas).map((input, i) => ({
-                musica: input.value,
-                autor: autores[i].value,
-                referencia: refs[i].value
-            }))
+            louvoresAbertura: Array.from(musicas).map((input, i) => {
+                const previewDiv = document.querySelector(`#preview-ref-${i}`);
+
+                return {
+                    musica: input.value,
+                    autor: autores[i].value,
+                    referencia: refs[i].value,
+                    texto: previewDiv ? previewDiv.innerHTML : ""
+                };
+            })
         };
     },
     3: () => ({
@@ -33,10 +38,17 @@ export const extratoresDeDados = {
             texto: document.querySelector("#preview-ref-ofertas")?.innerHTML,
             musica: document.querySelector("#musica_ofertas")?.value,
             autor: document.querySelector("#autor_ofertas")?.value,
-            oracaoPor: document.querySelector("#oracao_ofertas")?.value
+            oracaoOfertas: document.querySelector("#oracao_ofertas")?.value
         }
     }),
     5: () => ({
+        intercessao: {
+            musica: document.querySelector("#musica_intercessao")?.value,
+            autor: document.querySelector("#autor_intercessao")?.value,
+            quemOrara: document.querySelector("#intercessor_input")?.value
+        }
+    }),
+    6: () => ({
         edificacao: {
             pregador: document.querySelector("#pregador_input")?.value,
             musicaPos: document.querySelector("#musica_pos_mensagem")?.value,
@@ -45,10 +57,10 @@ export const extratoresDeDados = {
         oracaoFinal: document.querySelector("#bencao_input")?.value,
         louvorFinal: {
             musica: document.querySelector("#musica_final")?.value,
-            autor: document.querySelector("#autor_final").value
+            autor: document.querySelector("#autor_final")?.value
         }
     }),
-    6: () => ({
+    7: () => ({
         louvoresCeia: {
             pao1: {
                 musica: document.querySelector('[data-index="ceia_pao_1"]')?.value,
@@ -84,6 +96,7 @@ export function obterResumoOrdenado(dados) {
                 leitura: dados.leituraCongregacional,
                 visitantes: dados.visitantes,
                 ofertas: dados.ofertas,
+                intercessao: dados.intercessao,
                 edificacao: dados.edificacao,
                 encerramento: { bencao: dados.oracaoFinal, musicaFinal: dados.louvorFinal }
             };

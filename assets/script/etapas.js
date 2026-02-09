@@ -161,6 +161,41 @@ export function visitantesEOfertas(dados) {
     `;
 }
 
+export function intercessao(dados) {
+    const index = "inter"; 
+    
+    return `
+        <div class="step-content">
+            <h5 class="fw-bold mb-3">Momento de Intercessão</h5>
+            
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-primary">Música de Preparação</label>
+                <div class="busca-musica-container" style="position: relative;">
+                    <input type="text" id="musica_intercessao" 
+                           class="form-control louvor-item mb-1" 
+                           data-index="${index}"
+                           placeholder="Nome da música" 
+                           value="${dados.intercessao?.musica || ''}" />
+                    
+                    <ul id="sugestoes-musica-${index}" class="list-group lista-sugestoes"
+                        style="position: absolute; z-index: 1000; width: 100%; display: none;"></ul>
+                    
+                    <input type="text" id="autor_intercessao" 
+                           class="form-control autor-louvor-item" 
+                           placeholder="Autor/Banda" 
+                           value="${dados.intercessao?.autor || ''}" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-primary">Oração Intercessória</label>
+                <input type="text" id="intercessor_input" class="form-control" 
+                       value="${dados.intercessao?.quemOrara || ''}" placeholder="Quem fará a oração?">
+            </div>
+        </div>
+    `;
+}
+
 export function edificacaoEEncerramento(dados) {
     return `
         <div class="text-center mb-4">

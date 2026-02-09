@@ -1,6 +1,32 @@
+.visualizacao-full {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f2f5;
+    z-index: 2000;
+    overflow-y: auto;
+    display: block;
+    user-select: none;
+}
+
 body.modal-open {
     overflow: hidden;
     height: 100vh;
+}
+
+#div-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 40px;
+}
+
+#appLogo {
+    object-fit: cover;
+    width: 100px;
 }
 
 #btn_novo {
@@ -15,6 +41,12 @@ body.modal-open {
         font-weight: bolder;
     }
 
+}
+
+#btn-fechar-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card-culto-flex {

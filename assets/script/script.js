@@ -1,6 +1,6 @@
 import { musicas } from "./musicas.js";
 import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros, configurarPainelOpcoes } from "./config.js";
-import { edificacaoEEncerramento, infosInicias, leituraCongregacional, louvores, louvoresCeia, visitantesEOfertas } from "./etapas.js";
+import { edificacaoEEncerramento, infosInicias, intercessao, leituraCongregacional, louvores, louvoresCeia, visitantesEOfertas } from "./etapas.js";
 import { extratoresDeDados, obterResumoOrdenado } from "./genData.js";
 
 const tela = document.querySelector("body");
@@ -175,8 +175,9 @@ function renderizarPasso() {
     else if (dadosBoletim.etapaAtual === 2) conteudoEtapa = louvores(dadosBoletim);
     else if (dadosBoletim.etapaAtual === 3) conteudoEtapa = leituraCongregacional(dadosBoletim);
     else if (dadosBoletim.etapaAtual === 4) conteudoEtapa = visitantesEOfertas(dadosBoletim);
-    else if (dadosBoletim.etapaAtual === 5) conteudoEtapa = edificacaoEEncerramento(dadosBoletim);
-    else if (dadosBoletim.etapaAtual === 6) conteudoEtapa = louvoresCeia(dadosBoletim);
+    else if (dadosBoletim.etapaAtual === 5) conteudoEtapa = intercessao(dadosBoletim);
+    else if (dadosBoletim.etapaAtual === 6) conteudoEtapa = edificacaoEEncerramento(dadosBoletim);
+    else if (dadosBoletim.etapaAtual === 7) conteudoEtapa = louvoresCeia(dadosBoletim);
 
     const ultimaEtapa = posicaoNoRoteiro === totalEtapas;
 
@@ -195,7 +196,7 @@ function renderizarPasso() {
 
     container.appendChild(wrapper);
 
-    if (dadosBoletim.etapaAtual === 2 || dadosBoletim.etapaAtual === 4) {
+    if (dadosBoletim.etapaAtual === 2 || dadosBoletim.etapaAtual === 4 || dadosBoletim.etapaAtual === 5) {
         buscarMusicas(container, musicas);
     }
 
@@ -224,11 +225,11 @@ function renderizarPasso() {
         configurarBuscaBiblica(container)
     }
 
-    if (dadosBoletim.etapaAtual === 5) {
+    if (dadosBoletim.etapaAtual === 6) {
         buscarMusicas(container, musicas);
     }
 
-    if (dadosBoletim.etapaAtual === 6) {
+    if (dadosBoletim.etapaAtual === 7) {
         buscarMusicas(container, musicas);
     }
 
