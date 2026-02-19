@@ -207,7 +207,8 @@ function renderizarPasso() {
         const gerarInputs = (qtd) => {
             containerInputs.innerHTML = "";
             for (let i = 1; i <= qtd; i++) {
-                const dadosAnteriores = dadosBoletim.louvoresAbertura[i - 1] || { referencia: "", musica: "", autor: "" };
+                const lista = dadosBoletim.louvoresAbertura || [];
+                const dadosAnteriores = lista[i - 1] || { referencia: "", musica: "", autor: "" };
                 containerInputs.innerHTML += criarCardMusica(i, dadosAnteriores);
             }
 
@@ -216,7 +217,9 @@ function renderizarPasso() {
 
         }
 
-        if (dadosBoletim.louvoresAbertura.length > 0) gerarInputs(dadosBoletim.louvoresAbertura.length);
+        if (dadosBoletim.louvoresAbertura?.length > 0) {
+            gerarInputs(dadosBoletim.louvoresAbertura.length);
+        }
         inputQtd.addEventListener("input", (e) => gerarInputs(e.target.value));
 
     }

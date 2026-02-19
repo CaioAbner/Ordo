@@ -10,7 +10,7 @@ export function infosInicias(dados) {
         </div>
         <div class="mb-3">
             <label class="form-label fw-semibold">Dirigente do Culto</label>
-            <input type="text" id="dirigente_input" class="form-control" placeholder="Ex: Ir. Fulano / Pr. João" value="${dados.dirigenteCulto}">
+            <input type="text" id="dirigente_input" class="form-control" placeholder="Ex: Ir. Fulano / Pr. João" value="${dados.dirigenteGeral}">
         </div>`;
 }
 

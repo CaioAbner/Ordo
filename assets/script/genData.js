@@ -79,56 +79,41 @@ export const extratoresDeDados = {
 };
 
 export function obterResumoOrdenado(dados) {
-
-    const resumoBase = {
+    const resumo = {
         tipo: dados.tipoCulto,
-        data: dados.dataCulto,
+        data: dados.dataCulto || dados.data,
         dirigenteGeral: dados.dirigenteCulto,
         id: dados.id || Date.now()
     };
 
-    switch (dados.tipoCulto) {
-
-        case "Celebração Dominical":
-            return {
-                ...resumoBase,
-                abertura: { dirigente: dados.dirigenteLouvor, musicas: dados.louvoresAbertura },
-                leitura: dados.leituraCongregacional,
-                visitantes: dados.visitantes,
-                ofertas: dados.ofertas,
-                intercessao: dados.intercessao,
-                edificacao: dados.edificacao,
-                encerramento: { bencao: dados.oracaoFinal, musicaFinal: dados.louvorFinal }
-            };
-
-        case "Oração e Doutrina":
-            return {
-                ...resumoBase,
-                leitura: dados.leituraCongregacional,
-                abertura: { dirigente: dados.dirigenteLouvor, musicas: dados.louvoresAbertura },
-                edificacao: dados.edificacao,
-                encerramento: { bencao: dados.oracaoFinal }
-            };
-
-        case "Celebração Dominical - Ceia":
-            return {
-                ...resumoBase,
-                abertura: { dirigente: dados.dirigenteLouvor, musicas: dados.louvoresAbertura },
-                leitura: dados.leituraCongregacional,
-                visitantes: dados.visitantes,
-                ofertas: dados.ofertas,
-                edificacao: dados.edificacao,
-                momentoCeia: {
-                    pao1: dados.louvoresCeia?.pao1,
-                    vinho: dados.louvoresCeia?.vinho,
-                    pao2: dados.louvoresCeia?.pao2
-                },
-                encerramento: { bencao: dados.oracaoFinal, musicaFinal: dados.louvorFinal }
-            };
-
-        default:
-            return resumoBase;
-
+    if (dados.louvoresAbertura?.length > 0) {
+        resumo.louvoresAbertura = dados.louvoresAbertura;
+        resumo.dirigenteLouvor = dados.dirigenteLouvor;
     }
 
+    if (dados.leituraCongregacional?.referencia) {
+        resumo.leituraCongregacional = dados.leituraCongregacional;
+    }
+
+    if (dados.visitantes?.musica) resumo.visitantes = dados.visitantes;
+    if (dados.ofertas?.referencia || dados.ofertas?.musica) resumo.ofertas = dados.ofertas;
+
+    if (dados.intercessao?.musica || dados.intercessao?.quemOrara) {
+        resumo.intercessao = dados.intercessao;
+    }
+
+    if (dados.edificacao?.pregador) {
+        resumo.edificacao = dados.edificacao;
+    }
+
+    if (dados.tipoCulto.includes("Ceia") && dados.louvoresCeia) {
+        resumo.ceia = dados.louvoresCeia;
+    }
+
+    if (dados.oracaoFinal || dados.louvorFinal?.musica) {
+        resumo.oracaoFinal = dados.oracaoFinal;
+        if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
+    }
+
+    return resumo;
 }

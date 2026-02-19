@@ -2,7 +2,7 @@ import { buscarPassagem } from "./bibleService.js";
 
 export const roteiros = {
     "Celebração Dominical": [1, 2, 3, 4, 5, 6],
-    "Oração e Doutrina": [1, 2, 3, 6],
+    "Oração e Doutrina": [1, 2, 6],
     "Celebração Dominical - Ceia": [1, 2, 3, 4, 6, 7]
 };
 
@@ -10,7 +10,7 @@ const TRADUCOES = {
     data: "Data do Culto",
     dirigenteGeral: "Dirigente do Culto",
     louvoresAbertura: "Momento de Louvor",
-    dirigente: "Dirigente do Louvor",
+    dirigenteLouvor: "Dirigente do Louvor",
     leituraCongregacional: "Leitura da Palavra",
     visitantes: "Visitantes",
     ofertas: "Dízimos e Ofertas",
@@ -66,7 +66,7 @@ export function criarEstruturaBoletim(tipo) {
             tipoCulto: "Celebração Dominical",
             etapaAtual: 1,
             dataCulto: "",
-            dirigenteCulto: "",
+            dirigenteGeral: "",
             louvoresAbertura: [],
             dirigenteLouvor: "",
             leituraCongregacional: { referencia: "", texto: "" },
@@ -77,9 +77,10 @@ export function criarEstruturaBoletim(tipo) {
             louvorFinal: { musica: "", autor: "" }
         },
         ord: {
-            tipoCulto: "Culto de Oração e Doutrina",
+            tipoCulto: "Oração e Doutrina",
             etapaAtual: 1,
             dataCulto: "",
+            dirigenteGeral: "",
             louvoresAbertura: [],
             dirigenteLouvor: "",
             edificacao: { pregador: "" },
@@ -89,7 +90,7 @@ export function criarEstruturaBoletim(tipo) {
             tipoCulto: "Celebração Dominical - Ceia",
             etapaAtual: 1,
             dataCulto: "",
-            dirigenteCulto: "",
+            dirigenteGeral: "",
             louvoresAbertura: [],
             dirigenteLouvor: "",
             leituraCongregacional: { referencia: "", texto: "" },
@@ -319,7 +320,7 @@ export function configurarPainelOpcoes(id, callbacks) {
 }
 
 function formatarValorVisualizacao(valor, chaveOriginal = "") {
-if (!valor) return '<span class="text-muted small">Não informado</span>';
+    if (!valor) return '<span class="text-muted small">Não informado</span>';
 
     if (typeof valor === 'string') {
         return `
@@ -334,6 +335,19 @@ if (!valor) return '<span class="text-muted small">Não informado</span>';
     if (typeof valor === 'object' && !Array.isArray(valor)) {
         let htmlManual = "";
 
+        if (valor.referencia && !valor.musica && !valor.titulo) {
+            return `
+                <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+                    <small class="text-uppercase text-primary fw-bold d-block mb-1" style="font-size: 10px;">
+                        ${TRADUCOES[chaveOriginal] || "Referência"}
+                    </small>
+                    <div class="text-dark fw-bold">${valor.referencia}</div>
+                    <div class="mt-2 p-2 bg-light rounded fst-italic shadow-sm" style="font-size: 0.85rem; color: #444;">
+                        ${valor.texto || 'Texto não carregado.'}
+                    </div>
+                </div>`;
+        }
+
         if (valor.pregador) {
             htmlManual += formatarValorVisualizacao(valor.pregador, "pregador");
         }
@@ -341,11 +355,15 @@ if (!valor) return '<span class="text-muted small">Não informado</span>';
         const nomeMusica = valor.musica || valor.musicaPos || valor.titulo;
         if (nomeMusica) {
             const nomeAutor = valor.autor || valor.autorPos;
+            let labelDinamica = "Música";
+            if (chaveOriginal === "edificacao") labelDinamica = "Música Pós-Mensagem";
+            if (chaveOriginal === "musicaFinal") labelDinamica = "Música Final";
 
             htmlManual += `
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+                <small class="text-uppercase text-primary fw-bold d-block mb-1" style="font-size: 10px;">${labelDinamica}</small>
                 <div class="text-dark">
-                    <strong>${nomeMusica} - </strong> 
+                    <strong>${nomeMusica}</strong> 
                     ${nomeAutor ? `<span class="text-muted small">(${nomeAutor})</span>` : ''}
                 </div>
                 ${valor.referencia ? `
@@ -356,8 +374,8 @@ if (!valor) return '<span class="text-muted small">Não informado</span>';
         }
 
         Object.entries(valor).forEach(([subChave, subValor]) => {
-            const chavesJaRenderizadas = ['pregador', 'musica', 'musicaPos', 'titulo', 'autor', 'autorPos', 'referencia', 'texto'];
-            if (!chavesJaRenderizadas.includes(subChave) && subValor) {
+            const chavesJaTratadas = ['pregador', 'musica', 'musicaPos', 'titulo', 'autor', 'autorPos', 'referencia', 'texto'];
+            if (!chavesJaTratadas.includes(subChave) && subValor) {
                 htmlManual += formatarValorVisualizacao(subValor, subChave);
             }
         });
@@ -390,6 +408,8 @@ export function mostrarVisualizacao(id) {
 
     Object.entries(culto).forEach(([chave, valor]) => {
         if (camposIgnorar.includes(chave)) return;
+
+        if (!valor || (typeof valor === "object" && Object.values(valor).every(v => v === ""))) return;
 
         const labelSeção = TRADUCOES[chave] || chave;
         conteudo += `
