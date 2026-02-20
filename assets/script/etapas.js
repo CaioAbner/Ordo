@@ -169,7 +169,7 @@ export function intercessao(dados) {
             <h5 class="fw-bold mb-3">Momento de Intercessão</h5>
             
             <div class="mb-4">
-                <label class="form-label small fw-bold text-primary">Música de Preparação</label>
+                <label class="form-label small fw-bold text-primary">Música da Intercessão</label>
                 <div class="busca-musica-container" style="position: relative;">
                     <input type="text" id="musica_intercessao" 
                            class="form-control louvor-item mb-1" 

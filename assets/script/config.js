@@ -11,7 +11,7 @@ const TRADUCOES = {
     dirigenteGeral: "Dirigente do Culto",
     louvoresAbertura: "Momento de Louvor",
     dirigenteLouvor: "Dirigente do Louvor",
-    leituraCongregacional: "Leitura da Palavra",
+    leituraCongregacional: "Leitura Congregacional",
     visitantes: "Visitantes",
     ofertas: "Dízimos e Ofertas",
     intercessao: "Momento de Intercessão",
@@ -322,6 +322,26 @@ export function configurarPainelOpcoes(id, callbacks) {
 function formatarValorVisualizacao(valor, chaveOriginal = "") {
     if (!valor) return '<span class="text-muted small">Não informado</span>';
 
+    if (chaveOriginal === "ceia" && Array.isArray(valor)) {
+        return valor.map(item => `
+            <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+                <div class="d-flex flex-column">
+                    <small class="text-primary fw-bold text-uppercase d-block mb-1" style="font-size: 10px;">
+                        Música - (${item.label})
+                    </small>
+                    <div class="text-dark">
+                        <strong>${item.musica}</strong> 
+                        ${item.autor ? `<span class="text-muted ms-1 small">- (${item.autor})</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    if (Array.isArray(valor)) {
+        return valor.map(item => formatarValorVisualizacao(item, "musica")).join("");
+    }
+
     if (typeof valor === 'string') {
         return `
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-bottom">
@@ -332,7 +352,7 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
             </div>`;
     }
 
-    if (typeof valor === 'object' && !Array.isArray(valor)) {
+    if (typeof valor === 'object' && valor !== null) {
         let htmlManual = "";
 
         if (valor.referencia && !valor.musica && !valor.titulo) {
@@ -363,8 +383,8 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
                 <small class="text-uppercase text-primary fw-bold d-block mb-1" style="font-size: 10px;">${labelDinamica}</small>
                 <div class="text-dark">
-                    <strong>${nomeMusica}</strong> 
-                    ${nomeAutor ? `<span class="text-muted small">(${nomeAutor})</span>` : ''}
+                    <strong>${nomeMusica} -</strong> 
+                    ${nomeAutor ? `<span class="text-muted small"> (${nomeAutor})</span>` : ''}
                 </div>
                 ${valor.referencia ? `
                     <div class="mt-2 p-2 bg-light rounded fst-italic shadow-sm" style="font-size: 0.85rem;">
@@ -381,10 +401,6 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
         });
 
         return htmlManual;
-    }
-
-    if (Array.isArray(valor)) {
-        return valor.map(item => formatarValorVisualizacao(item, "musica")).join("");
     }
 
     return `<span>${valor}</span>`;

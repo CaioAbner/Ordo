@@ -107,12 +107,60 @@ export function obterResumoOrdenado(dados) {
     }
 
     if (dados.tipoCulto.includes("Ceia") && dados.louvoresCeia) {
-        resumo.ceia = dados.louvoresCeia;
+        const itensCeia = [];
+
+        if (dados.louvoresCeia.pao1?.musica) {
+            itensCeia.push({
+                label: "Pão",
+                musica: dados.louvoresCeia.pao1.musica,
+                autor: dados.louvoresCeia.pao1.autor
+            });
+        }
+
+        if (dados.louvoresCeia.vinho?.musica) {
+            itensCeia.push({
+                label: "Vinho",
+                musica: dados.louvoresCeia.vinho.musica,
+                autor: dados.louvoresCeia.vinho.autor
+            });
+        }
+
+        if (dados.louvoresCeia.pao2?.musica) {
+            itensCeia.push({
+                label: "Pão",
+                musica: dados.louvoresCeia.pao2.musica,
+                autor: dados.louvoresCeia.pao2.autor
+            });
+        }
+
+        if (itensCeia.length > 0) {
+            resumo.ceia = itensCeia;
+        }
+
     }
 
     if (dados.oracaoFinal || dados.louvorFinal?.musica) {
         resumo.oracaoFinal = dados.oracaoFinal;
         if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
+    }
+
+    if (dados.tipoCulto === "Personalizado") {
+        resumo.cronograma = (dados.itensPersonalizados || []).map((item, index) => {
+            return {
+                id: `item-${index}-${Date.now()}`,
+                tipo: item.tipo,
+                titulo: item.titulo || "", 
+                
+                conteudo: {
+                    musica: item.musica || null,
+                    autor: item.autor || null,
+                    referencia: item.referencia || null,
+                    texto: item.texto || null,
+                    responsavel: item.responsavel || item.pregador || null,
+                    observacao: item.observacao || null
+                }
+            };
+        });
     }
 
     return resumo;
