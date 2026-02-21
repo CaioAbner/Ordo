@@ -3,7 +3,8 @@ import { buscarPassagem } from "./bibleService.js";
 export const roteiros = {
     "Celebração Dominical": [1, 2, 3, 4, 5, 6],
     "Oração e Doutrina": [1, 2, 6],
-    "Celebração Dominical - Ceia": [1, 2, 3, 4, 6, 7]
+    "Celebração Dominical - Ceia": [1, 2, 3, 4, 6, 7],
+    "Personalizado": [1, 8]
 };
 
 const TRADUCOES = {
@@ -101,10 +102,10 @@ export function criarEstruturaBoletim(tipo) {
             louvorFinal: { musica: "", autor: "" }
         },
         personalizado: {
-            tipoCulto: "",
+            tipoCulto: "Personalizado",
             etapaAtual: 1,
             dataCulto: "",
-            dirigenteCulto: "",
+            dirigenteGeral: "",
             cronograma: []
         }
     };
@@ -426,6 +427,26 @@ export function mostrarVisualizacao(id) {
         if (camposIgnorar.includes(chave)) return;
 
         if (!valor || (typeof valor === "object" && Object.values(valor).every(v => v === ""))) return;
+
+        if (chave === "cronograma" && Array.isArray(valor)) {
+
+        valor.forEach(item => {
+            const labelPersonalizado = item.tipo.toUpperCase();
+            conteudo += `
+                <div class="secao-container mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-warning rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                        <h6 class="fw-bold text-uppercase m-0" style="font-size: 0.8rem; letter-spacing: 1.5px;">
+                            ${item.titulo || labelPersonalizado}
+                        </h6>
+                    </div>
+                    <div>${formatarValorVisualizacao(item, item.tipo)}</div>
+                </div>
+            `;
+        });
+
+        return;
+    }
 
         const labelSeção = TRADUCOES[chave] || chave;
         conteudo += `

@@ -320,3 +320,21 @@ select:focus {
     gap: 15px;
     font-size: 1.1rem;
 }
+
+.posicao-musica-item {
+    padding-top: 10px;
+}
+
+.transition-icon {
+    transition: transform 0.3s ease;
+}
+
+.musica-personalizada-item {
+    padding-top: 12px !important;
+    padding-right: 15px !important;
+}
+
+.musica-personalizada-item .btn-link.position-absolute {
+    top: 5px !important;
+    right: 5px !important;
+}

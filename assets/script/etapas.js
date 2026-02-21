@@ -248,3 +248,81 @@ export function edificacaoEEncerramento(dados) {
         </div>
     `;
 }
+
+export function cultoPersonalizado(dados) {
+    return `
+        <div class="p-3">
+            <div class="mb-4">
+                <label class="form-label fw-bold">Nome do Culto / Evento</label>
+                <input type="text" id="nome-culto-personalizado" class="form-control" 
+                       placeholder="Ex: Congresso Identidade" value="${dados.nomePersonalizado || ''}">
+            </div>
+
+            <div id="container-momentos">
+                </div>
+
+            <button type="button" class="btn btn-primary w-100 py-3 mt-3 border-dashed" onclick="abrirSeletorModulos()">
+                <i class='bx bx-plus-circle'></i> Adicionar Momento
+            </button>
+        </div>
+
+        <div id="seletor-modulos" class="d-none mt-3 p-3 border rounded bg-light">
+            <h6>Que tipo de momento deseja adicionar?</h6>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary text-start" onclick="criarMomento('louvor')">
+                    <i class='bx bx-music'></i> Módulo de Louvor (Músicas)
+                </button>
+                <button class="btn btn-outline-success text-start" onclick="criarMomento('leitura')">
+                    <i class='bx bx-book-open'></i> Módulo de Leitura (Bíblia)
+                </button>
+                <button class="btn btn-outline-dark text-start" onclick="criarMomento('pregação')">
+                    <i class='bx bx-microphone'></i> Módulo de Pregação
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+export function gerarHtmlBloco(tipo) {
+    const labels = {
+        louvor: { titulo: "Música/Louvor", cor: "primary" },
+        leitura: { titulo: "Leitura Bíblica", cor: "success" },
+        edificacao: { titulo: "Mensagem/Pregador", cor: "info" },
+        texto: { titulo: "Texto Livre/Avisos", cor: "secondary" }
+    };
+
+    return `
+        <div class="bloco-item-personalizado border-start border-4 border-${labels[tipo].cor} bg-white p-3 mb-3 shadow-sm rounded position-relative" data-tipo="${tipo}">
+            <button type="button" class="btn-remove-bloco btn btn-link text-danger position-absolute top-0 end-0 mt-1">
+                <i class='bx bx-trash'></i>
+            </button>
+            
+            <small class="fw-bold text-${labels[tipo].cor} text-uppercase" style="font-size: 10px;">${labels[tipo].titulo}</small>
+            
+            <div class="mt-2">
+                <input type="text" class="form-control form-control-sm mb-2 input-titulo" placeholder="Título opcional (ex: Momento de Adoração)">
+                
+                ${tipo === 'louvor' ? `
+                    <input type="text" class="form-control form-control-sm mb-1 input-musica" placeholder="Nome da música">
+                    <input type="text" class="form-control form-control-sm input-autor" placeholder="Autor">
+                ` : ''}
+
+                ${tipo === 'leitura' ? `
+                    <div class="input-group input-group-sm mb-1">
+                        <input type="text" class="form-control input-referencia" placeholder="Ex: Salmos 23">
+                        <button class="btn btn-outline-secondary btn-buscar-biblia" type="button"><i class='bx bx-search'></i></button>
+                    </div>
+                    <textarea class="form-control form-control-sm input-texto" placeholder="Versículos..."></textarea>
+                ` : ''}
+
+                ${tipo === 'edificacao' ? `
+                    <input type="text" class="form-control form-control-sm input-pregador" placeholder="Nome do Pregador/Ministrante">
+                ` : ''}
+
+                ${tipo === 'texto' ? `
+                    <textarea class="form-control form-control-sm input-texto" placeholder="Digite aqui o aviso ou texto..."></textarea>
+                ` : ''}
+            </div>
+        </div>
+    `;
+}

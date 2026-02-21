@@ -1,3 +1,26 @@
+function capturarItensPersonalizados() {
+    const blocos = document.querySelectorAll(".bloco-item-personalizado");
+    const listaFinal = [];
+
+    blocos.forEach(bloco => {
+        const tipo = bloco.dataset.tipo;
+
+        const item = {
+            tipo: tipo,
+            titulo: bloco.querySelector('.input-titulo')?.value || "",
+            musica: bloco.querySelector('.input-musica')?.value || "",
+            autor: bloco.querySelector('.input-autor')?.value || "",
+            referencia: bloco.querySelector('.input-referencia')?.value || "",
+            texto: bloco.querySelector('.input-texto')?.value || "",
+            pregador: bloco.querySelector('.input-pregador')?.value || ""
+        };
+
+        listaFinal.push(item);
+    });
+
+    return listaFinal;
+}
+
 export const extratoresDeDados = {
     1: () => ({
         dataCulto: document.querySelector("#data_input")?.value,
@@ -75,7 +98,12 @@ export const extratoresDeDados = {
                 autor: document.querySelectorAll('.autor-louvor-item')[2]?.value
             }
         }
-    })
+    }),
+    8: () => {
+        return {
+            cronograma: capturarItensPersonalizados()
+        };
+    }
 };
 
 export function obterResumoOrdenado(dados) {
@@ -86,81 +114,82 @@ export function obterResumoOrdenado(dados) {
         id: dados.id || Date.now()
     };
 
-    if (dados.louvoresAbertura?.length > 0) {
-        resumo.louvoresAbertura = dados.louvoresAbertura;
-        resumo.dirigenteLouvor = dados.dirigenteLouvor;
-    }
+    if (dados.tipoCulto !== "Personalizado") {
 
-    if (dados.leituraCongregacional?.referencia) {
-        resumo.leituraCongregacional = dados.leituraCongregacional;
-    }
-
-    if (dados.visitantes?.musica) resumo.visitantes = dados.visitantes;
-    if (dados.ofertas?.referencia || dados.ofertas?.musica) resumo.ofertas = dados.ofertas;
-
-    if (dados.intercessao?.musica || dados.intercessao?.quemOrara) {
-        resumo.intercessao = dados.intercessao;
-    }
-
-    if (dados.edificacao?.pregador) {
-        resumo.edificacao = dados.edificacao;
-    }
-
-    if (dados.tipoCulto.includes("Ceia") && dados.louvoresCeia) {
-        const itensCeia = [];
-
-        if (dados.louvoresCeia.pao1?.musica) {
-            itensCeia.push({
-                label: "Pão",
-                musica: dados.louvoresCeia.pao1.musica,
-                autor: dados.louvoresCeia.pao1.autor
-            });
+        if (dados.louvoresAbertura?.length > 0) {
+            resumo.louvoresAbertura = dados.louvoresAbertura;
+            resumo.dirigenteLouvor = dados.dirigenteLouvor;
         }
 
-        if (dados.louvoresCeia.vinho?.musica) {
-            itensCeia.push({
-                label: "Vinho",
-                musica: dados.louvoresCeia.vinho.musica,
-                autor: dados.louvoresCeia.vinho.autor
-            });
+        if (dados.leituraCongregacional?.referencia) {
+            resumo.leituraCongregacional = dados.leituraCongregacional;
         }
 
-        if (dados.louvoresCeia.pao2?.musica) {
-            itensCeia.push({
-                label: "Pão",
-                musica: dados.louvoresCeia.pao2.musica,
-                autor: dados.louvoresCeia.pao2.autor
-            });
+        if (dados.visitantes?.musica) resumo.visitantes = dados.visitantes;
+        if (dados.ofertas?.referencia || dados.ofertas?.musica) resumo.ofertas = dados.ofertas;
+
+        if (dados.intercessao?.musica || dados.intercessao?.quemOrara) {
+            resumo.intercessao = dados.intercessao;
         }
 
-        if (itensCeia.length > 0) {
-            resumo.ceia = itensCeia;
+        if (dados.edificacao?.pregador) {
+            resumo.edificacao = dados.edificacao;
         }
 
+        if (dados.tipoCulto.includes("Ceia") && dados.louvoresCeia) {
+            const itensCeia = [];
+
+            if (dados.louvoresCeia.pao1?.musica) {
+                itensCeia.push({
+                    label: "Pão",
+                    musica: dados.louvoresCeia.pao1.musica,
+                    autor: dados.louvoresCeia.pao1.autor
+                });
+            }
+
+            if (dados.louvoresCeia.vinho?.musica) {
+                itensCeia.push({
+                    label: "Vinho",
+                    musica: dados.louvoresCeia.vinho.musica,
+                    autor: dados.louvoresCeia.vinho.autor
+                });
+            }
+
+            if (dados.louvoresCeia.pao2?.musica) {
+                itensCeia.push({
+                    label: "Pão",
+                    musica: dados.louvoresCeia.pao2.musica,
+                    autor: dados.louvoresCeia.pao2.autor
+                });
+            }
+
+            if (itensCeia.length > 0) {
+                resumo.ceia = itensCeia;
+            }
+
+        }
+
+        if (dados.oracaoFinal || dados.louvorFinal?.musica) {
+            resumo.oracaoFinal = dados.oracaoFinal;
+            if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
+        }
+    } else if (dados.tipoCulto === "Personalizado") {
+        const tipoParaExibir = (dados.tipo === "Personalizado" && dados.nomeEvento)
+                ? dados.nomeEvento
+                : dados.tipo;
+
+        return {
+            id: dados.id || Date.now(),
+            tipo: tipoParaExibir,
+            tipoOriginal: dados.tipo,
+            data: dados.dataCulto || dados.data,
+            dirigenteGeral: dados.dirigenteGeral,
+            momentos: capturarItensPersonalizados || []
+        };
     }
 
-    if (dados.oracaoFinal || dados.louvorFinal?.musica) {
+    if (dados.oracaoFinal) {
         resumo.oracaoFinal = dados.oracaoFinal;
-        if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
-    }
-
-    if (dados.tipoCulto === "Personalizado") {
-        resumo.cronograma = (dados.itensPersonalizados || []).map((item, index) => {
-            return {
-                id: `item-${index}-${Date.now()}`,
-                tipo: item.tipo,
-                titulo: item.titulo || "", 
-                
-                conteudo: {
-                    musica: item.musica || null,
-                    autor: item.autor || null,
-                    referencia: item.referencia || null,
-                    texto: item.texto || null,
-                    responsavel: item.responsavel || item.pregador || null,
-                    observacao: item.observacao || null
-                }
-            };
-        });
     }
 
     return resumo;
