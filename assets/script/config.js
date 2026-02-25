@@ -314,7 +314,12 @@ export function configurarPainelOpcoes(id, callbacks) {
             fecharSheet();
             const cultos = JSON.parse(localStorage.getItem("meus_boletins")) || [];
             const culto = cultos.find(culto => Number(culto.id) === Number(id));
-            if (culto) gerarPDFBoletim(culto);
+            if (culto) {
+                console.log("Gerar PDF para:", culto);
+                gerarPDFBoletim(culto);
+            } else {
+                alert("Erro ao encontrar os dados do boletim.")
+            }
         };
     }
 
@@ -509,7 +514,7 @@ export function mostrarVisualizacao(id) {
 
 export function gerarPDFBoletim(dados) {
     const areaImpressao = document.createElement("div");
-    areaImpressao.className = "folha-a4";
+    areaImpressao.className = "folha-pdf";
 
     const dataFormatada = new Date(dados.data + "T12:00:00").toLocaleDateString("pt-BR", {
         weekday: "long", day: "numeric", month: "long", year: "numeric"
@@ -517,101 +522,207 @@ export function gerarPDFBoletim(dados) {
 
     areaImpressao.innerHTML = `
         <style>
-            .folha-a4 { font-family: 'Arial', sans-serif; padding: 15mm; color: #333; background: white }
-            .header-pdf { text-align: center; margin-bottom: 15px; }
-            .header-pdf h1 { color: #000; text-transform: uppercase; font-size: 22px; margin-bottom: 0; }
-            .header-pdf p { color: #0000FF; font-weight: bold; margin-top: 5px; text-transform: capitalize; }
-            .versiculo-pdf { font-style: italic; color: #0000FF; text-align: center; margin-bottom: 25px; font-size: 13px; }
+            @page { size: A4 landscape; margin: 0; }
+            body { margin: 0; padding: 0; background: #eee; }
             
-            .container-colunas {
+            .folha-pdf {
+                width: 297mm;
+                height: 210mm;
+                padding: 12mm;
+                box-sizing: border-box;
+                font-family: 'Arial', sans-serif;
+                background: white;
                 column-count: 2;
-                column-gap: 30px;
-                column-fill: auto;
-                height: 235mm;
-                text-align: left;
+                column-gap: 15mm;
+                column-rule: 1px solid #ddd;
             }
+
+            /* Cabeçalho centralizado atravessando as colunas */
+            .header-pdf { 
+                column-span: all; 
+                text-align: center; 
+                margin-bottom: 5mm;
+                padding-bottom: 5mm;
+                border-bottom: 1.5px solid #000;
+            }
+            .header-pdf h1 { font-size: 24pt; margin: 0; text-transform: uppercase; color: #000; }
+            .header-pdf p { font-size: 13pt; font-style: italic; margin: 3px 0; color: #0000FF; font-weight: bold; }
+
+            .versiculo-topo {
+                column-span: all;
+                text-align: center;
+                font-style: italic;
+                font-size: 11pt;
+                color: #0000FF;
+                margin: 5mm 0 10mm 0;
+                padding: 0 30mm;
+            }
+
+            /* Estilo dos Itens */
+            .item-culto { break-inside: avoid; margin-bottom: 5mm; line-height: 1.3; }
             
-            .item-culto { 
-                margin-bottom: 15px;
-                line-height: 1.3;
-                break-inside: avoid;
-            }
-            .titulo-item { font-weight: bold; text-decoration: underline; text-transform: uppercase; display: block; margin-bottom: 2px; }
-            .musica-item { color: #D35400; font-weight: bold; display: block; margin: 4px 0; }
-            .leitura-pdf { color: #2ECC71; font-weight: bold; }
-            .texto-leitura { color: #0000FF; font-size: 12px; display: block; margin-top: 4px; }
-            .clave-sol { font-size: 16px; margin-right: 5px; }
+            .titulo-item { font-weight: bold; text-transform: uppercase; font-size: 11pt; color: #000; }
+            .referencia-biblica { color: #00B050; font-weight: bold; font-size: 11pt; }
+            .texto-biblico { font-size: 10pt; color: #0000FF; font-style: italic; display: block; margin-top: 2px; }
+            
+            .version-identifier { color: #FF0000 }
+            .musica-item { font-size: 11pt; color: #E67E22; font-weight: bold; margin: 4mm 0; display: flex; align-items: center; flex-wrap: wrap; }
+            .autor-musica { font-weight: 200; margin-left: 4px; }
+            .musica-index { font-weight: 200; margin-right: 4px; text-decoration: underline; }
+            .musica-index-alt { margin-right: 4px; text-decoration: underline; color: #000; }
+            .clave { font-size: 16pt; color: #000; margin-right: 8px; font-weight: normal; }
+            .tonalidade { color: #E67E22; margin-left: 5px; }
+            
+            .nome-pessoa { color: #E67E22; margin-left: 4px; }
+            .pessoas-identifier { margin-left: 4px; color: #0000FF; font-weight: 200; font-style: italic; font-size: 1rem; }
+            .second-text { margin-left: 18px; color: #000; font-weight: 200; font-size: 1rem; }
         </style>
 
-        <div class="header-pdf">
-            <h1>${dados.tipo}</h1>
-            <p>${dataFormatada}</p>
-        </div>
-        <div class="versiculo-pdf">
-            "Deus é Espírito, e é necessário que os seus adoradores o adorem em espírito e em verdade."
-        </div>
+        <header class="header-pdf">
+            <h1>${dados.tipo || 'CELEBRAÇÃO DOMINICAL'}</h1>
+            <p>${dataFormatada.charAt(0).toUpperCase(0) + dataFormatada.slice(1)}</p>
 
-        <div class="container-colunas">
+            <div class="versiculo-topo">
+                "Deus é Espírito, e é necessário que os seus adoradores o adorem em espírito e em verdade."
+            </div>
+        </header>
+
+        <div class="conteudo-dinamico">
             ${gerarConteudoCulto(dados)}
         </div>
     `;
 
     const opt = {
-        margin: 5,
-        filename: `Boletim_${dados.data}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        margin: 0,
+        filename: `Boletim-${dados.data}.pdf`,
+        image: { type: "jpeg", quality: 1 },
         html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }
     };
 
     html2pdf().set(opt).from(areaImpressao).save();
 }
 
-function gerarConteudoCulto(dados, lado) {
+function gerarConteudoCulto(dados) {
     let html = "";
-    const clave = "&#119070";
-
-    html += `<div class="item-culto"><span class="titulo-item">PRELÚDIO:</span></div>`;
-    html += `<div class="item-culto"><span class="titulo-item">ORAÇÃO:</span> ${dados.dirigenteGeral || ''}</div>`;
-
-    if (dados.louvoresAbertura) {
-        dados.louvoresAbertura.forEach((m, i) => {
-            html += `
-                <div class="item-culto">
-                    <span class="musica-item">
-                        <span class="clave-sol">${clave}</span> MÚSICA ${i + 1}: ${m.musica} <span style="font-weight:normal">(${m.autor || ''})</span>
-                    </span>
-                </div>`;
-        });
-    }
-
-    if (dados.leitura) {
-        html += `
-            <div class="item-culto">
-                <span class="titulo-item">LEITURA CONGREGACIONAL:</span> 
-                <span class="leitura-pdf">${dados.leitura.referencia || ''}</span>
-                <span class="texto-leitura">${dados.leitura.texto || ''}</span>
-            </div>
-        `;
-    }
-
-    if (dados.visitantes) {
-        html += `
-            <div class="item-culto">
-                <span class="musica-item"><span class="clave-sol">${clave}</span> VISITANTES: ${dados.visitantes.musica || ''}</span>
-            </div>
-        `;
-    }
+    const versao = "NVI"
+    const clave = "&#119070;";
 
     html += `
         <div class="item-culto">
-            <span class="titulo-item">MOMENTO DE EDIFICAÇÃO DA NOSSA FÉ</span>
-            <span>Mensagem: ${dados.edificacao?.pregador || ''}</span>
+            <span class="clave">${clave}</span> <span class="titulo-item">PRELÚDIO:</span>
         </div>
         <div class="item-culto">
-            <span class="musica-item"><span class="clave-sol">${clave}</span> MÚSICA PÓS-MENSAGEM:</span>
+            <span class="titulo-item">ORAÇÃO:</span><span class="pessoas-identifier">${dados.dirigenteGeral || ''}</span>
         </div>
     `;
+
+    if (dados.louvoresAbertura && dados.louvoresAbertura.length > 0) {
+        dados.louvoresAbertura.forEach((l, index) => {
+
+            if (l.referencia) {
+                html += `
+                    <div class="item-culto">
+                        <span class="titulo-item" style="text-decoration: underline;">LEITURA CONGREGACIONAL ${index + 1}:</span> 
+                        <span class="referencia-biblica">${l.referencia.toUpperCase()} <span class="version-identifier">(${versao})</span></span>
+                        ${l.texto ? `<span class="texto-biblico">${l.texto}</span>` : ''}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="musica-item">
+                    <span class="clave">${clave}</span> 
+                    <span class="musica-index">MÚSICA ${index + 1}:</span> ${l.musica} - ${l.autor ? `<span class="autor-musica">(${l.autor})</span>` : ''}
+                </div>
+            `;
+        });
+    }
+
+    if (dados.dirigenteLouvor) {
+        html += `
+                <div class="item-culto">
+                    <span class="titulo-item">ORAÇÃO DE LOUVOR:</span>
+                    <span class="pessoas-identifier">${dados.dirigenteLouvor || ''}</span>
+                </div>
+            `;
+    }
+
+    if (dados.leituraCongregacional) {
+        html += `
+            <div class="item-culto">
+                <span class="titulo-item" style="text-decoration: underline;">LEITURA CONGREGACIONAL 4:</span> 
+                <span class="referencia-biblica">${dados.leituraCongregacional.referencia.toUpperCase() || ''} <span class="version-identifier">(${versao})</span></span>
+                <span class="texto-biblico">${dados.leituraCongregacional.texto || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.visitantes?.musica) {
+        html += `
+            <div class="musica-item">
+                <span class="clave">${clave}</span>
+                <span class="titulo-item" style="text-decoration: underline;">VISITANTES:</span> 
+                <span class="nome-pessoa">${dados.visitantes.musica} -${dados.visitantes.autor ? `<span class="autor-musica">(${dados.visitantes.autor})</span>` : ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.ofertas) {
+        html += `
+            <div class="item-culto">
+                <span class="titulo-item" style="text-decoration: underline;">ENTREGA DÍZIMOS E OFERTAS:</span> 
+                <span class="referencia-biblica">${dados.ofertas.referencia.toUpperCase() || ''} <span class="version-identifier">(${versao})</span></span>
+                <span class="texto-biblico">${dados.ofertas.texto || ''}</span>
+            </div>
+            <div class="musica-item">
+                <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA:</span> ${dados.ofertas.musica || ''} - ${dados.ofertas.autor ? `<span class="autor-musica">(${dados.ofertas.autor})</span>` : ''}
+                <span class="second-text">Oração entregando as Ofertas:</span><span class="pessoas-identifier"> ${dados.ofertas.oracaoOfertas || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.intercessao) {
+        html += `
+            <div class="musica-item">
+                <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA:</span> ${dados.intercessao.musica || ''} - ${dados.intercessao.autor ? `<span class="autor-musica">(${dados.intercessao.autor})</span>` : ''}
+                <span class="second-text">Oração Intercessória:</span><span class="pessoas-identifier"> ${dados.intercessao.quemOrara || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.edificacao) {
+        html += `
+            <div class="item-culto">
+                <span class="titulo-item" style="text-decoration: underline; font-size: 2rem;">MOMENTO DE EDIFICAÇÃO DA NOSSA FÉ</span><br>
+                <span>Mensagem:</span><span class="pessoas-identifier">${dados.edificacao.pregador || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.edificacao.musicaPos && dados.edificacao.autorPos) {
+        html += `
+            <div class="musica-item">
+                <span class="musica-index-alt">MÚSICA PÓS MENSAGEM:</span> ${dados.edificacao.musicaPos || ''} - ${dados.edificacao.autorPos ? `<span class="autor-musica">(${dados.edificacao.autorPos})</span>` : ''}
+            </div>
+        `;
+    }
+
+    if (dados.oracaoFinal) {
+        html += `
+            <div class="item-culto">
+                <span class="titulo-item">ORAÇÃO FINAL E BÊNÇÃO:</span> <span class="pessoas-identifier"> ${dados.oracaoFinal || ''}</span>
+            </div>
+        `;
+    }
+
+    if (dados.louvorFinal) {
+        html += `
+            <div class="musica-item">
+                <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA FINAL:</span> ${dados.louvorFinal.musica || ''} - ${dados.louvorFinal.autor ? `<span class="autor-musica">(${dados.louvorFinal.autor})</span>` : ''}
+            </div>
+        `;
+    }
 
     return html;
 }

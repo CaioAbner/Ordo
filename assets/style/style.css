@@ -338,3 +338,14 @@ select:focus {
     top: 5px !important;
     right: 5px !important;
 }
+
+#btn-pdf-sheet {
+    border: 1px solid #ff000033;
+    background-color: #fff5f5;
+    font-weight: 600;
+}
+
+#btn-pdf-sheet i {
+    font-size: 1.2rem;
+    vertical-align: middle;
+}

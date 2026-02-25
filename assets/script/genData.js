@@ -174,17 +174,17 @@ export function obterResumoOrdenado(dados) {
             if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
         }
     } else if (dados.tipoCulto === "Personalizado") {
-        const tipoParaExibir = (dados.tipo === "Personalizado" && dados.nomeEvento)
+        const tipoParaExibir = (dados.nomeEvento && dados.nomeEvento.trim() !== "")
                 ? dados.nomeEvento
-                : dados.tipo;
+                : "Culto Personalizado";
 
         return {
             id: dados.id || Date.now(),
             tipo: tipoParaExibir,
-            tipoOriginal: dados.tipo,
+            tipoOriginal: "Personalizado",
             data: dados.dataCulto || dados.data,
             dirigenteGeral: dados.dirigenteGeral,
-            momentos: capturarItensPersonalizados || []
+            momentos: capturarItensPersonalizados()
         };
     }
 
