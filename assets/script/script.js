@@ -14,10 +14,11 @@ function capturarItensPersonalizados() {
     const listaFinal = [];
 
     cardsMomentos.forEach(bloco => {
-        const isLouvor = card.querySelector(".bx-music") !== null;
-        const tipo = isLouvor ? "Louvor" : "Leitura";
+        const isLouvor = bloco.querySelector(".bx-music") !== null;
+        const inputTitulo = bloco.querySelector(".input-titulo-momento");
+        const tituloMomento = inputTitulo?.value || "";
 
-        const tituloMomento = card.querySelector(".input-titulo-momento")?.value || "";
+        const tipo = isLouvor ? "louvor" : "leitura";
 
         const momentoObjeto = {
             tipo: tipo,
@@ -33,13 +34,13 @@ function capturarItensPersonalizados() {
                     referencia: bloco.querySelector(".referencia-louvor-item")?.value || "",
                     musica: bloco.querySelector(".louvor-item")?.value || "",
                     autor: bloco.querySelector(".autor-louvor-item")?.value || "",
-                    textoReferencia: bloco.querySelector("[id^='preview-ref-']")?.innerText || "",
+                    textoReferencia: bloco.querySelector(".preview-ref-container, [id^='preview-ref-']")?.innerText || "",
                 };
             });
         } else {
             momentoObjeto.conteudo = {
-                referencia: card.querySelector(".referencia-biblica-input")?.value || "",
-                texto: card.querySelector("[id^='preview-ref-']")?.innerText || ""
+                referencia: bloco.querySelector(".referencia-biblica-input")?.value || "",
+                texto: bloco.querySelector("[id^='preview-ref-']")?.innerText || ""
             };
         }
 
@@ -176,20 +177,15 @@ function configurarEventosNavegacao() {
 
         if (dadosBoletim.tipo === "Personalizado") {
             dadosBoletim.itensPersonalizados = capturarItensPersonalizados();
+            const nomeEvento = document.querySelector("#nome-culto-personalizado")?.value;
+            if (nomeEvento) dadosBoletim.tipo = nomeEvento;
         }
 
         if (extratoresDeDados[dadosBoletim.etapaAtual]) {
             Object.assign(dadosBoletim, extratoresDeDados[dadosBoletim.etapaAtual]());
         }
 
-        if (indexAtual === roteiro.length - 1) {
-            if (dadosBoletim.tipo === "Personalizado") {
-                const nomeEvento = document.querySelector("#nome-culto-personalizado")?.value;
-                if (nomeEvento) dadosBoletim.nomeEvento = nomeEvento;
-
-                dadosBoletim.itensPersonalizados = capturarItensPersonalizados();
-            }
-            
+        if (indexAtual === roteiro.length - 1) {            
             salvarCultoFinalizado();
             localStorage.removeItem("boletim_atual");
             alert("Culto salvo com sucesso!");
@@ -320,70 +316,66 @@ window.criarMomento = (tipo) => {
 
     const container = document.querySelector("#container-momentos");
     const id = Date.now();
-    let cor = tipo === 'louvor' ? 'primary' : 'success';
+    let cor = "secondary";
+
+    if (tipo === "louvor") cor = "primary";
+    if (tipo === "leitura") cor = "success";
+    if (tipo === "pregacao") cor = "dark";
 
     const wrapper = document.createElement("div");
     wrapper.className = `card mb-2 shadow-sm border-0 border-start border-3 border-${cor}`;
     wrapper.id = `momento-${id}`;
 
-    const idPrimeiraMusica = Date.now() + Math.random();
+    let htmlConteudo = "";
+
+    if (tipo === 'louvor') {
+        const idMusica = Date.now() + 1;
+        htmlConteudo = `
+            <div id="lista-musicas-${id}">
+                <div class="musica-personalizada-item">${criarCardMusica(1, { referencia: "", musica: "", autor: "" })}</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="adicionarMaisUmaMusica('${id}')">Adicionar música</button>
+        `;
+    } else if (tipo === 'leitura') {
+        htmlConteudo = `
+            <div class="input-group input-group-sm mb-2">
+                <input type="text" class="form-control referencia-biblica-input" data-index="${id}" placeholder="Referência (Ex: Salmos 23)">
+                <button class="btn btn-success btn-buscar-ref" type="button" data-index="${id}"><i class='bx bx-search'></i></button>
+            </div>
+            <div id="preview-ref-${id}" class="small text-muted p-2 bg-light rounded">Versículos aparecerão aqui...</div>
+        `;
+    } else if (tipo === 'pregacao') {
+        htmlConteudo = `
+            <div class="row g-2 bloco-pregacao" id="bloco-pregacao-${id}">
+                <div class="col-12"><input type="text" class="form-control form-control-sm pregador-input" placeholder="Nome do Pregador"></div>
+                <div class="col-12"><input type="text" class="form-control form-control-sm musica-pos-input" placeholder="Música pós mensagem"></div>
+                <div class="col-12"><input type="text" class="form-control form-control-sm oracao-final-input" placeholder="Quem fará a Oração Final e Benção?"></div>
+                <div class="col-12"><input type="text" class="form-control form-control-sm musica-final-input" placeholder="Música Final"></div>
+            </div>
+        `;
+    }
 
     wrapper.innerHTML = `
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-2">
             <div class="d-flex align-items-center gap-2 flex-grow-1">
-                <i class='bx ${tipo === 'louvor' ? 'bx-music text-primary' : 'bx-book-open text-success'}'></i>
+                <i class='bx ${tipo === 'louvor' ? 'bx-music text-primary' : tipo === 'leitura' ? 'bx-book-open text-success' : 'bx-microphone text-warning'}'></i>
                 <input type="text" class="form-control form-control-sm border-0 fw-bold p-0 bg-transparent input-titulo-momento" 
-                       placeholder="${tipo === 'louvor' ? 'Ex: Momento de Louvor' : 'Ex: Leitura Bíblica'}">
+                       value="${tipo === 'louvor' ? 'MOMENTO DE LOUVOR' : tipo === 'leitura' ? 'LEITURA BÍBLICA' : 'PREGAÇÃO E ENCERRAMENTO'}">
             </div>
-            
             <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-link text-secondary p-1 me-1" onclick="toggleMomento('${id}')">
-                    <i class='bx bx-chevron-up fs-4 transition-icon' id="icon-toggle-${id}"></i>
-                </button>
-                <button type="button" class="btn btn-link text-danger p-1" onclick="removerMomento('${id}')">
-                    <i class='bx bx-trash fs-5'></i>
-                </button>
+                <button type="button" class="btn btn-link text-secondary p-1" onclick="toggleMomento('${id}')"><i class='bx bx-chevron-up fs-4' id="icon-toggle-${id}"></i></button>
+                <button type="button" class="btn btn-link text-danger p-1" onclick="removerMomento('${id}')"><i class='bx bx-trash fs-5'></i></button>
             </div>
         </div>
-        
-        <div class="card-body pt-0 animate__animated animate__fadeIn" id="body-${id}">
-            <hr class="mt-0 mb-3 opacity-25">
-            ${tipo === 'louvor' ? `
-                <div id="lista-musicas-${id}">
-                    <div class="musica-personalizada-item position-relative" id="item-musica-${idPrimeiraMusica}">
-                        <button type="button" class="btn btn-link text-secondary position-absolute end-0 top-0 p-0 mt-n1 me-n1" 
-                                onclick="document.getElementById('item-musica-${idPrimeiraMusica}').remove()" 
-                                style="z-index: 10; text-decoration: none;">
-                            <i class='bx bx-x fs-4'></i>
-                        </button>
-                        ${criarCardMusica(1, { referencia: "", musica: "", autor: "" })}
-                    </div>
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2 border-dashed" 
-                        onclick="adicionarMaisUmaMusica('${id}')">
-                    <i class='bx bx-plus'></i> Adicionar outra música
-                </button>
-            ` : `
-                <div class="input-group input-group-sm mb-2">
-                    <input type="text" class="form-control referencia-biblica-input" data-index="${id}" placeholder="Referência (Ex: Salmos 23)">
-                    <button class="btn btn-success btn-buscar-ref" type="button" data-index="${id}">
-                        <i class='bx bx-search'></i>
-                    </button>
-                </div>
-                <div id="preview-ref-${id}" class="small text-muted p-2 bg-light rounded shadow-inner" style="min-height: 40px;">
-                    Versículos aparecerão aqui...
-                </div>
-            `}
-        </div>
+        <div class="card-body pt-0" id="body-${id}">${htmlConteudo}</div>
     `;
 
     container.appendChild(wrapper);
-
-    const seletor = document.getElementById("seletor-modulos");
-    if (seletor) seletor.classList.add("d-none");
-
     configurarBuscaBiblica(container);
     buscarMusicas(container, musicas);
+    
+    const seletor = document.getElementById("seletor-modulos");
+    if (seletor) seletor.classList.add("d-none");
 };
 
 window.toggleMomento = (id) => {
