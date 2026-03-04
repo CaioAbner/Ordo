@@ -1,5 +1,5 @@
 import { musicas } from "./musicas.js";
-import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros, configurarPainelOpcoes } from "./config.js";
+import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros, configurarPainelOpcoes, mostrarVisualizacao } from "./config.js";
 import { cultoPersonalizado, edificacaoEEncerramento, gerarHtmlBloco, infosInicias, intercessao, leituraCongregacional, louvores, louvoresCeia, visitantesEOfertas } from "./etapas.js";
 import { extratoresDeDados, obterResumoOrdenado } from "./genData.js";
 
@@ -8,47 +8,6 @@ const btn_create = document.querySelector("#btn_novo");
 let dadosBoletim = {};
 
 window.addEventListener("load", renderizarBoletins);
-
-function capturarItensPersonalizados() {
-    const cardsMomentos = document.querySelectorAll("[id^='momento-']");
-    const listaFinal = [];
-
-    cardsMomentos.forEach(bloco => {
-        const isLouvor = bloco.querySelector(".bx-music") !== null;
-        const inputTitulo = bloco.querySelector(".input-titulo-momento");
-        const tituloMomento = inputTitulo?.value || "";
-
-        const tipo = isLouvor ? "louvor" : "leitura";
-
-        const momentoObjeto = {
-            tipo: tipo,
-            titulo: tituloMomento,
-            conteudo: []
-        }
-
-        if (tipo === "louvor") {
-            const blocosMusica = card.querySelectorAll(".musica-personalizada-item");
-
-            momentoObjeto.conteudo = Array.from(blocosMusica).map(bloco => {
-                return {
-                    referencia: bloco.querySelector(".referencia-louvor-item")?.value || "",
-                    musica: bloco.querySelector(".louvor-item")?.value || "",
-                    autor: bloco.querySelector(".autor-louvor-item")?.value || "",
-                    textoReferencia: bloco.querySelector(".preview-ref-container, [id^='preview-ref-']")?.innerText || "",
-                };
-            });
-        } else {
-            momentoObjeto.conteudo = {
-                referencia: bloco.querySelector(".referencia-biblica-input")?.value || "",
-                texto: bloco.querySelector("[id^='preview-ref-']")?.innerText || ""
-            };
-        }
-
-        listaFinal.push(momentoObjeto);
-    });
-
-    return listaFinal;
-}
 
 function adicionarNovoBloco(tipo) {
     const container = document.querySelector("#container-itens-personalizados");
@@ -174,12 +133,6 @@ function configurarEventosNavegacao() {
     const indexAtual = roteiro.indexOf(dadosBoletim.etapaAtual);
 
     btnProximo.addEventListener("click", () => {
-
-        if (dadosBoletim.tipo === "Personalizado") {
-            dadosBoletim.itensPersonalizados = capturarItensPersonalizados();
-            const nomeEvento = document.querySelector("#nome-culto-personalizado")?.value;
-            if (nomeEvento) dadosBoletim.tipo = nomeEvento;
-        }
 
         if (extratoresDeDados[dadosBoletim.etapaAtual]) {
             Object.assign(dadosBoletim, extratoresDeDados[dadosBoletim.etapaAtual]());
@@ -309,34 +262,56 @@ btn_create.addEventListener('click', abrirModal);
 window.addEventListener("load", renderizarBoletins);
 
 window.criarMomento = (tipo) => {
-    document.querySelectorAll(".card-body:not(.d-none)").forEach(body => {
-        const idExistente = body.id.replace("body-", "");
-        window.toggleMomento(idExistente);
+    document.querySelectorAll(".card-body").forEach(body => {
+        if (!body.classList.contains("d-none")) {
+            const idParaFechar = body.id.replace("body-", "");
+            window.toggleMomento(idParaFechar);
+        }
     });
 
     const container = document.querySelector("#container-momentos");
-    const id = Date.now();
+    if (!container) {
+        console.error("Container #container-momentos não encontrado.");
+        return;
+    }
+
+    const seletor = document.getElementById("seletor-modulos");
+    if (seletor) seletor.classList.add("d-none");
     let cor = "secondary";
 
-    if (tipo === "louvor") cor = "primary";
-    if (tipo === "leitura") cor = "success";
-    if (tipo === "pregacao") cor = "dark";
+    const id = Date.now();
+
+    const configs = {
+        louvor: { cor: "primary", icone: "bx-music", label: "Ex: Momento de Louvor" },
+        leitura: { cor: "success", icone: "bx-book-open", label: "Ex: Leitura Bíblica" },
+        edificacao: { cor: "dark", icone: "bx-microphone", label: "Ex: Mensagem/Edificação" },
+        ceia: { cor: "danger", icone: "bx-wine", label: "Ex: Santa Ceia" },
+        intercessao: { cor: "info", icone: "bx-church", label: "Ex: Intercessão" },
+        ofertas: { cor: "success", icone: "bx-coin-stack", label: "Ex: Dízimos e Ofertas" },
+        visitantes: { cor: "warning", icone: "bx-group", label: "Ex: Visitantes" },
+        avisos: { cor: "secondary", icone: "bx-bell", label: "Ex: Avisos" }
+    };
+
+    const c = configs[tipo] || configs.avisos;
 
     const wrapper = document.createElement("div");
-    wrapper.className = `card mb-2 shadow-sm border-0 border-start border-3 border-${cor}`;
+    wrapper.className = `card mb-2 shadow-sm border-0 border-start border-3 border-${c.cor}`;
     wrapper.id = `momento-${id}`;
 
     let htmlConteudo = "";
 
-    if (tipo === 'louvor') {
-        const idMusica = Date.now() + 1;
+    if (tipo === "louvor") {
         htmlConteudo = `
             <div id="lista-musicas-${id}">
-                <div class="musica-personalizada-item">${criarCardMusica(1, { referencia: "", musica: "", autor: "" })}</div>
+                <div class="musica-personalizada-item">
+                    ${criarCardMusica(1, { referencia: "", musica: "", autor: "" })}
+                </div>
             </div>
-            <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="adicionarMaisUmaMusica('${id}')">Adicionar música</button>
+            <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="adicionarMaisUmaMusica('${id}')">
+                <i class='bx bx-plus'></i> Adicionar música
+            </button>
         `;
-    } else if (tipo === 'leitura') {
+    } else if (tipo === "leitura") {
         htmlConteudo = `
             <div class="input-group input-group-sm mb-2">
                 <input type="text" class="form-control referencia-biblica-input" data-index="${id}" placeholder="Referência (Ex: Salmos 23)">
@@ -344,38 +319,110 @@ window.criarMomento = (tipo) => {
             </div>
             <div id="preview-ref-${id}" class="small text-muted p-2 bg-light rounded">Versículos aparecerão aqui...</div>
         `;
-    } else if (tipo === 'pregacao') {
+    } else if (tipo === "edificacao") {
         htmlConteudo = `
-            <div class="row g-2 bloco-pregacao" id="bloco-pregacao-${id}">
-                <div class="col-12"><input type="text" class="form-control form-control-sm pregador-input" placeholder="Nome do Pregador"></div>
-                <div class="col-12"><input type="text" class="form-control form-control-sm musica-pos-input" placeholder="Música pós mensagem"></div>
-                <div class="col-12"><input type="text" class="form-control form-control-sm oracao-final-input" placeholder="Quem fará a Oração Final e Benção?"></div>
-                <div class="col-12"><input type="text" class="form-control form-control-sm musica-final-input" placeholder="Música Final"></div>
+            <div class="row g-2 bloco-edificacao p-1" id="bloco-edificacao-${id}">
+                <div class="col-12 mb-1">
+                    <label class="small fw-bold text-muted">Pregador:</label>
+                    <input type="text" class="form-control form-control-sm pregador-input" placeholder="Ex: Pr. Etevaldo">
+                </div>
+                <div class="col-12 mb-1 busca-musica-container" style="position: relative;">
+                    <label class="small fw-bold text-muted">Música Pós-Mensagem:</label>
+                    <input type="text" class="form-control form-control-sm louvor-item musica-pos-input" data-index="pos-${id}" placeholder="Nome da música">
+                    <ul id="sugestoes-musica-pos-${id}" class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+                    <input type="text" class="form-control form-control-sm autor-louvor-item mt-1" placeholder="Autor da música pós">
+                </div>
+                <div class="col-12 mb-1">
+                    <label class="small fw-bold text-muted">Oração Final e Benção:</label>
+                    <input type="text" class="form-control form-control-sm oracao-final-input" placeholder="Quem fará a oração?">
+                </div>
+                <div class="col-12 busca-musica-container" style="position: relative;">
+                    <label class="small fw-bold text-muted">Música Final:</label>
+                    <input type="text" class="form-control form-control-sm louvor-item musica-final-input" data-index="final-${id}" placeholder="Música de saída">
+                    <ul id="sugestoes-musica-final-${id}" class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+                    <input type="text" class="form-control form-control-sm autor-louvor-item mt-1" placeholder="Autor da música final">
+                </div>
             </div>
+        `;
+    } else if (tipo === "ceia") {
+        htmlConteudo = `
+            <div class="p-2 border rounded bg-light mb-2">
+                <label class="small fw-bold d-block mb-1">Quantos momentos de louvor na Ceia?</label>
+                <input type="number" class="form-control form-control-sm" id="qtd-ceia-${id}" min="1" max="5" placeholder="Ex: 2">
+                <button type="button" class="btn btn-sm btn-danger w-100 mt-2" onclick="gerarCamposCeia('${id}')">Gerar Campos da Ceia</button>
+            </div>
+            <div id="lista-itens-ceia-${id}"></div>
+        `;
+    } else if (tipo === "intercessao") {
+        htmlConteudo = `
+            <div class="busca-musica-container" style="position: relative;">
+                <label class="small fw-bold">Música de Fundo (Opcional):</label>
+                <input type="text" class="form-control form-control-sm louvor-item" data-index="inter-${id}" placeholder="Nome da música">
+                <ul id="sugestoes-musica-inter-${id}" class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+                <input type="text" class="form-control form-control-sm autor-louvor-item mt-1" placeholder="Autor">
+            </div>
+            <input type="text" class="form-control form-control-sm mt-2 intercessor-input" placeholder="Quem fará a oração?">
+        `;
+    } else if (tipo === "ofertas") {
+        htmlConteudo = `
+            <div class="mb-3">
+                <label class="small fw-bold text-success">Referência Bíblica:</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control referencia-biblica-input" data-index="ofertas-${id}" placeholder="Ex: 2 Coríntios 9:7">
+                    <button class="btn btn-success btn-buscar-ref" type="button" data-index="ofertas-${id}"><i class='bx bx-search'></i></button>
+                </div>
+                <div id="preview-ref-ofertas-${id}" class="small text-muted p-2 bg-light rounded mt-1" style="min-height: 30px;">
+                    O texto bíblico aparecerá aqui...
+                </div>
+            </div>
+
+            <div class="busca-musica-container" style="position: relative;">
+                <label class="small fw-bold text-success">Música do Ofertório:</label>
+                <input type="text" class="form-control form-control-sm louvor-item mb-1" placeholder="Nome da música">
+                <ul class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+                <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor">
+            </div>
+
+            <div class="mt-2">
+                <label class="small fw-bold text-success">Oração pelas Ofertas:</label>
+                <input type="text" class="form-control form-control-sm oracao-ofertas-input" placeholder="Quem fará a oração?">
+            </div>
+        `;
+    } else if (tipo === "visitantes") {
+        htmlConteudo = `
+            <div class="busca-musica-container" style="position: relative;">
+                <label class="small fw-bold">Música de Recepção:</label>
+                <input type="text" class="form-control form-control-sm louvor-item" data-index="visit-${id}" placeholder="Nome da música">
+                <ul id="sugestoes-musica-visit-${id}" class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+                <input type="text" class="form-control form-control-sm autor-louvor-item mt-1" placeholder="Autor">
+            </div>
+        `;
+    } else if (tipo === "avisos") {
+        cor = "secondary";
+        htmlConteudo = `
+            <textarea class="form-control form-control-sm" rows="3" placeholder="Digite os avisos aqui..."></textarea>
         `;
     }
 
     wrapper.innerHTML = `
-        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-2">
-            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                <i class='bx ${tipo === 'louvor' ? 'bx-music text-primary' : tipo === 'leitura' ? 'bx-book-open text-success' : 'bx-microphone text-warning'}'></i>
-                <input type="text" class="form-control form-control-sm border-0 fw-bold p-0 bg-transparent input-titulo-momento" 
-                       value="${tipo === 'louvor' ? 'MOMENTO DE LOUVOR' : tipo === 'leitura' ? 'LEITURA BÍBLICA' : 'PREGAÇÃO E ENCERRAMENTO'}">
+            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <i class='bx ${c.icone} text-${c.cor} fs-5'></i>
+                    <input type="text" class="form-control form-control-sm border-0 fw-bold p-0 input-titulo-momento" placeholder="${c.label}">
+                </div>
+                <div class="d-flex">
+                    <button class="btn btn-link text-secondary p-1" onclick="toggleMomento('${id}')"><i class='bx bx-chevron-up' id="icon-toggle-${id}"></i></button>
+                    <button class="btn btn-link text-danger p-1" onclick="removerMomento('${id}')"><i class='bx bx-trash'></i></button>
+                </div>
             </div>
-            <div class="d-flex align-items-center">
-                <button type="button" class="btn btn-link text-secondary p-1" onclick="toggleMomento('${id}')"><i class='bx bx-chevron-up fs-4' id="icon-toggle-${id}"></i></button>
-                <button type="button" class="btn btn-link text-danger p-1" onclick="removerMomento('${id}')"><i class='bx bx-trash fs-5'></i></button>
+            <div class="card-body" id="body-${id}">
+                ${htmlConteudo}
             </div>
-        </div>
-        <div class="card-body pt-0" id="body-${id}">${htmlConteudo}</div>
-    `;
+        `;
 
     container.appendChild(wrapper);
-    configurarBuscaBiblica(container);
-    buscarMusicas(container, musicas);
-    
-    const seletor = document.getElementById("seletor-modulos");
-    if (seletor) seletor.classList.add("d-none");
+    configurarBuscaBiblica(wrapper);
+    buscarMusicas(wrapper, musicas);
 };
 
 window.toggleMomento = (id) => {
@@ -421,6 +468,36 @@ window.adicionarMaisUmaMusica = (containerId) => {
 
     buscarMusicas(div, musicas);
     configurarBuscaBiblica(div);
+};
+
+window.gerarCamposCeia = (id) => {
+    const qtd = document.getElementById(`qtd-ceia-${id}`).value;
+    const container = document.getElementById(`lista-itens-ceia-${id}`);
+    container.innerHTML = "";
+
+    for (let i = 1; i <= qtd; i++) {
+        const itemCeiaId = `${id}-${i}`;
+        const div = document.createElement("div");
+        div.className = "p-3 border rounded mb-3 bg-white shadow-sm busca-musica-container position-relative";
+
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="gap: 0.5rem;">
+                <span class="badge bg-danger-subtle text-danger">Música ${i}</span>
+                <div class="btn-group btn-group-sm">
+                    <input type="radio" class="btn-check" name="tipo-${itemCeiaId}" id="pao-${itemCeiaId}" value="Pão" checked>
+                    <label class="btn btn-outline-danger py-0 px-2" for="pao-${itemCeiaId}">🍞 Pão</label>
+                    <input type="radio" class="btn-check" name="tipo-${itemCeiaId}" id="vinho-${itemCeiaId}" value="Vinho">
+                    <label class="btn btn-outline-danger py-0 px-2" for="vinho-${itemCeiaId}">🍷 Vinho</label>
+                </div>
+            </div>
+            <input type="text" class="form-control form-control-sm louvor-item mb-1" data-index="ceia-${itemCeiaId}" placeholder="Nome do louvor">
+            <ul id="sugestoes-musica-ceia-${itemCeiaId}" class="list-group lista-sugestoes" style="display: none; position: absolute; z-index: 1000; width: 100%;"></ul>
+            <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor">
+        `;
+        container.appendChild(div);
+    }
+
+    buscarMusicas(container, musicas);
 };
 
 window.abrirSeletorModulos = () => {

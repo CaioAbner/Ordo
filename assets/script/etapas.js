@@ -90,7 +90,7 @@ export function leituraCongregacional(dados) {
             </div>
         </div>
         <div id="preview-ref-leitura" class="small text-muted p-2 bg-light rounded" 
-            style="min-height: 50px; font-style: italic; line-height: 1.5;">
+            style="min-height: 60px; font-style: italic; line-height: 1.5;">
             ${dados.leituraCongregacional.texto || '<span class="text-muted">O texto aparecerá aqui...</span>'}
         </div>
     `;
@@ -261,23 +261,22 @@ export function cultoPersonalizado(dados) {
             <div id="container-momentos">
                 </div>
 
-            <button type="button" class="btn btn-primary w-100 py-3 mt-3 border-dashed" onclick="abrirSeletorModulos()">
+            <button type="button" class="btn btn-primary w-100 py-3 mt-3 border-dashed" style="border-style: dashed !important;" onclick="abrirSeletorModulos()">
                 <i class='bx bx-plus-circle'></i> Adicionar Momento
             </button>
         </div>
 
-        <div id="seletor-modulos" class="d-none mt-3 p-3 border rounded bg-light">
-            <h6>Que tipo de momento deseja adicionar?</h6>
-            <div class="d-grid gap-2">
-                <button class="btn btn-outline-primary text-start" onclick="criarMomento('louvor')">
-                    <i class='bx bx-music'></i> Módulo de Louvor (Músicas)
-                </button>
-                <button class="btn btn-outline-success text-start" onclick="criarMomento('leitura')">
-                    <i class='bx bx-book-open'></i> Módulo de Leitura (Bíblia)
-                </button>
-                <button class="btn btn-outline-dark text-start" onclick="criarMomento('pregação')">
-                    <i class='bx bx-microphone'></i> Módulo de Pregação
-                </button>
+        <div id="seletor-modulos" class="d-none mt-3 p-3 border rounded bg-white shadow-sm">
+            <h6 class="fw-bold mb-3 text-center">Selecione os momentos que deseja adicionar ao seu culto.</h6>
+            <div class="row g-2">
+                <div class="col-6"><button class="btn btn-outline-primary w-100 text-start btn-sm" onclick="criarMomento('louvor')"><i class='bx bx-music'></i> Louvor</button></div>
+                <div class="col-6"><button class="btn btn-outline-success w-100 text-start btn-sm" onclick="criarMomento('leitura')"><i class='bx bx-book-open'></i> Leitura</button></div>
+                <div class="col-6"><button class="btn btn-outline-dark w-100 text-start btn-sm" onclick="criarMomento('edificacao')"><i class='bx bx-microphone'></i> Edificação</button></div>
+                <div class="col-6"><button class="btn btn-outline-danger w-100 text-start btn-sm" onclick="criarMomento('ceia')"><i class='bx bx-wine'></i> Ceia</button></div>
+                <div class="col-6"><button class="btn btn-outline-info w-100 text-start btn-sm" onclick="criarMomento('intercessao')"><i class="bx bx-church"></i> Intercessão</button></div>
+                <div class="col-6"><button class="btn btn-outline-success w-100 text-start btn-sm" onclick="criarMomento('ofertas')"><i class='bx bx-coin-stack'></i> Ofertas</button></div>
+                <div class="col-6"><button class="btn btn-outline-warning w-100 text-start btn-sm" onclick="criarMomento('visitantes')"><i class='bx bx-group'></i> Visitantes</button></div>
+                <div class="col-6"><button class="btn btn-outline-secondary w-100 text-start btn-sm" onclick="criarMomento('avisos')"><i class='bx bx-bell'></i> Avisos</button></div>
             </div>
         </div>
     `;
@@ -287,40 +286,49 @@ export function gerarHtmlBloco(tipo) {
     const labels = {
         louvor: { titulo: "Música/Louvor", cor: "primary" },
         leitura: { titulo: "Leitura Bíblica", cor: "success" },
-        edificacao: { titulo: "Mensagem/Pregador", cor: "info" },
+        edificacao: { titulo: "Mensagem/Pregador", cor: "dark" },
         texto: { titulo: "Texto Livre/Avisos", cor: "secondary" }
     };
 
+    const config = labels[tipo] || { titulo: "Outros", cor: "secondary" };
+
     return `
-        <div class="bloco-item-personalizado border-start border-4 border-${labels[tipo].cor} bg-white p-3 mb-3 shadow-sm rounded position-relative" data-tipo="${tipo}">
+        <div class="bloco-item-personalizado border-start border-4 border-${config.cor} bg-white p-3 mb-3 shadow-sm rounded position-relative" data-tipo="${tipo}">
             <button type="button" class="btn-remove-bloco btn btn-link text-danger position-absolute top-0 end-0 mt-1">
                 <i class='bx bx-trash'></i>
             </button>
             
-            <small class="fw-bold text-${labels[tipo].cor} text-uppercase" style="font-size: 10px;">${labels[tipo].titulo}</small>
+            <small class="fw-bold text-${config.cor} text-uppercase" style="font-size: 10px;">${config.titulo}</small>
             
             <div class="mt-2">
-                <input type="text" class="form-control form-control-sm mb-2 input-titulo" placeholder="Título opcional (ex: Momento de Adoração)">
+                <input type="text" class="form-control form-control-sm mb-2 input-titulo" placeholder="Título opcional">
                 
                 ${tipo === 'louvor' ? `
-                    <input type="text" class="form-control form-control-sm mb-1 input-musica" placeholder="Nome da música">
-                    <input type="text" class="form-control form-control-sm input-autor" placeholder="Autor">
+                    <input type="text" class="form-control form-control-sm mb-1 louvor-item" placeholder="Nome da música">
+                    <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor">
                 ` : ''}
 
                 ${tipo === 'leitura' ? `
                     <div class="input-group input-group-sm mb-1">
-                        <input type="text" class="form-control input-referencia" placeholder="Ex: Salmos 23">
-                        <button class="btn btn-outline-secondary btn-buscar-biblia" type="button"><i class='bx bx-search'></i></button>
+                        <input type="text" class="form-control referencia-biblica-input" placeholder="Ex: Salmos 23">
+                        <button class="btn btn-outline-secondary btn-buscar-ref" type="button"><i class='bx bx-search'></i></button>
                     </div>
-                    <textarea class="form-control form-control-sm input-texto" placeholder="Versículos..."></textarea>
+                    <div class="small text-muted p-2 bg-light rounded preview-ref">Versículos aparecerão aqui...</div>
                 ` : ''}
 
                 ${tipo === 'edificacao' ? `
-                    <input type="text" class="form-control form-control-sm input-pregador" placeholder="Nome do Pregador/Ministrante">
-                ` : ''}
+                    <input type="text" class="form-control form-control-sm mb-1 pregador-input" placeholder="Nome do Pregador">
+                    <div class="busca-musica-container" style="position: relative;">
+                        <input type="text" class="form-control form-control-sm mb-1 louvor-item musica-pos-input" placeholder="Música pós mensagem">
+                        <input type="text" class="form-control form-control-sm mb-1 autor-louvor-item" placeholder="Autor música pós">
+                    </div>
 
-                ${tipo === 'texto' ? `
-                    <textarea class="form-control form-control-sm input-texto" placeholder="Digite aqui o aviso ou texto..."></textarea>
+                    <input type="text" class="form-control form-control-sm mb-1 oracao-final-input" placeholder="Oração Final">
+                    
+                    <div class="busca-musica-container" style="position: relative;">
+                        <input type="text" class="form-control form-control-sm mb-1 louvor-item musica-final-input" placeholder="Música Final">
+                        <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor música final">
+                    </div>
                 ` : ''}
             </div>
         </div>

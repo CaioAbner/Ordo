@@ -179,11 +179,14 @@ export function configurarBuscaBiblica(container) {
 
 export function buscarMusicas(container, musicas) {
     container.addEventListener("input", (e) => {
-        if (e.target.classList.contains("louvor-item")) {
-            const index = e.target.dataset.index;
-            const termoBusca = e.target.value.toLowerCase().trim();
-            const listaUl = document.querySelector(`#sugestoes-musica-${index}`);
-
+        const input = e.target;
+        if (input.classList.contains("louvor-item")) {
+            const termoBusca = input.value.toLowerCase().trim();
+            
+            const buscaContainer = input.closest(".busca-musica-container");
+            if (!buscaContainer) return;
+            
+            const listaUl = buscaContainer.querySelector(".lista-sugestoes");
             if (!listaUl) return;
 
             if (termoBusca.length < 2) {
@@ -203,7 +206,7 @@ export function buscarMusicas(container, musicas) {
                         <li class="list-group-item list-group-item-action item-sugestao" 
                             data-titulo="${m.titulo}" 
                             data-autor="${m.autor}" 
-                            style="cursor: pointer;">
+                            style="cursor: pointer; font-size: 0.85rem;">
                             <strong>${m.titulo}</strong> <br>
                             <small class="text-muted">${m.autor}</small>
                         </li>`).join("");
@@ -219,12 +222,21 @@ export function buscarMusicas(container, musicas) {
         const item = e.target.closest(".item-sugestao");
         if (item) {
             const buscaContainer = item.closest(".busca-musica-container");
-            buscaContainer.querySelector(".louvor-item").value = item.dataset.titulo;
-            buscaContainer.querySelector(".autor-louvor-item").value = item.dataset.autor;
+            const inputMusica = buscaContainer.querySelector(".louvor-item");
+            const inputAutor = buscaContainer.querySelector(".autor-louvor-item");
+            
+            if (inputMusica) inputMusica.value = item.dataset.titulo;
+            if (inputAutor) inputAutor.value = item.dataset.autor;
+            
             item.parentElement.style.display = "none";
         }
     });
 
+    document.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("louvor-item")) {
+            document.querySelectorAll(".lista-sugestoes").forEach(ul => ul.style.display = "none");
+        }
+    });
 }
 
 export function fecharSheet() {
