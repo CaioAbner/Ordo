@@ -182,10 +182,10 @@ export function buscarMusicas(container, musicas) {
         const input = e.target;
         if (input.classList.contains("louvor-item")) {
             const termoBusca = input.value.toLowerCase().trim();
-            
+
             const buscaContainer = input.closest(".busca-musica-container");
             if (!buscaContainer) return;
-            
+
             const listaUl = buscaContainer.querySelector(".lista-sugestoes");
             if (!listaUl) return;
 
@@ -224,10 +224,10 @@ export function buscarMusicas(container, musicas) {
             const buscaContainer = item.closest(".busca-musica-container");
             const inputMusica = buscaContainer.querySelector(".louvor-item");
             const inputAutor = buscaContainer.querySelector(".autor-louvor-item");
-            
+
             if (inputMusica) inputMusica.value = item.dataset.titulo;
             if (inputAutor) inputAutor.value = item.dataset.autor;
-            
+
             item.parentElement.style.display = "none";
         }
     });
@@ -348,7 +348,7 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
                         Música - (${item.label})
                     </small>
                     <div class="text-dark">
-                        <strong>${item.musica}</strong> 
+                        <strong>${item.musica}</strong>
                         ${item.autor ? `<span class="text-muted ms-1 small">- (${item.autor})</span>` : ''}
                     </div>
                 </div>
@@ -401,7 +401,7 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
             <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
                 <small class="text-uppercase text-primary fw-bold d-block mb-1" style="font-size: 10px;">${labelDinamica}</small>
                 <div class="text-dark">
-                    <strong>${nomeMusica} -</strong> 
+                    <strong>${nomeMusica} -</strong>
                     ${nomeAutor ? `<span class="text-muted small"> (${nomeAutor})</span>` : ''}
                 </div>
                 ${valor.referencia ? `
@@ -422,6 +422,88 @@ function formatarValorVisualizacao(valor, chaveOriginal = "") {
     }
 
     return `<span>${valor}</span>`;
+}
+
+function formatarMomentoPersonalizado(item) {
+    let html = "";
+
+    const gerarCardPadrao = (label, principal, subPrincipal = "", referencia = "", texto = "") => {
+        return `
+           <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+            <small class="text-uppercase text-primary fw-bold d-block mb-1" style="font-size: 10px;">
+                ${label}
+            </small>
+            <div class="text-dark">
+                <strong>${principal}</strong> 
+                ${subPrincipal ? `<span class="text-muted small"> - (${subPrincipal})</span>` : ''}
+            </div>
+            
+            ${texto ? `
+                <div class="mt-2 p-2 bg-light rounded fst-italic shadow-sm" style="font-size: 0.85rem; color: #444;">
+                    ${texto}
+                </div>` : ''}
+        </div>`;
+    };
+
+    switch (item.tipo) {
+        case "louvor":
+            item.musicas?.forEach(m => {
+                html += gerarCardPadrao("Música", m.musica, m.autor, m.referencia, m.texto);
+            });
+            break;
+
+        case "leitura":
+            if (item.referencia) {
+                html += gerarCardPadrao("Leitura Congregacional", item.referencia, "", "", item.texto);
+            }
+            break
+        
+        case "ceia":
+            if (item.musicas && item.musicas.length > 0) {
+                item.musicas.forEach(m => {
+                    const labelCeia = `${m.elemento}`;
+                    html += gerarCardPadrao(labelCeia, m.musica, m.autor);
+                });
+            }
+            break;
+
+        case "intercessao":
+            if (item.musica) {
+                html += gerarCardPadrao("Música", item.musica, item.autor);
+                html += gerarCardPadrao("Oração Intercessória", item.pessoa);
+            }
+            break
+
+        case "ofertas":
+            if (item.musica) {
+                html += gerarCardPadrao("Música", item.musica, item.autor, item.referencia, item.texto);
+            }
+            
+            if (item.quemOrara) {
+                html += gerarCardPadrao("Oração pelas Ofertas", item.quemOrara);
+            }
+            break;
+
+        case "edificacao":
+            if (item.pregador) html += gerarCardPadrao("Pregador", item.pregador);
+            if (item.musicaPos) html += gerarCardPadrao("Música Pós-Mensagem", item.musicaPos, item.autorPos);
+            if (item.oracaoFinal) html += gerarCardPadrao("Oração final", item.oracaoFinal);
+            if (item.musicaFinal) html += gerarCardPadrao("Música Final", item.musicaFinal, item.autorFinal);
+            break;
+
+        case "avisos":
+            html += `
+                <div class="bg-white p-3 rounded shadow-sm mb-2 border-start border-primary border-4">
+                    <div class="text-dark" style="white-space: pre-wrap;">${item.texto}</div>
+                </div>`;
+            break;
+
+        default:
+            const titulo = item.titulo || item.tipo;
+            html += gerarCardPadrao(titulo, item.musica || item.pessoa || "", item.autor || "");
+    }
+
+    return html;
 }
 
 export function mostrarVisualizacao(id) {
@@ -446,24 +528,21 @@ export function mostrarVisualizacao(id) {
         if (!valor || (typeof valor === "object" && Object.values(valor).every(v => v === ""))) return;
 
         if (chave === "cronograma" && Array.isArray(valor)) {
-
-        valor.forEach(item => {
-            const labelPersonalizado = item.tipo.toUpperCase();
-            conteudo += `
-                <div class="secao-container mb-4">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-warning rounded-circle me-2" style="width: 8px; height: 8px;"></div>
-                        <h6 class="fw-bold text-uppercase m-0" style="font-size: 0.8rem; letter-spacing: 1.5px;">
-                            ${item.titulo || labelPersonalizado}
-                        </h6>
+            valor.forEach(item => {
+                conteudo += `
+                    <div class="secao-container mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary rounded-circle me-2" style="width: 8px; height: 8px;"></div>
+                            <h6 class="fw-bold text-uppercase m-0" style="font-size: 0.8rem; letter-spacing: 1.5px;">
+                                ${item.titulo || item.tipo}
+                            </h6>
+                        </div>
+                        <div>${formatarMomentoPersonalizado(item)}</div>
                     </div>
-                    <div>${formatarValorVisualizacao(item, item.tipo)}</div>
-                </div>
-            `;
-        });
-
-        return;
-    }
+                `;
+            });
+            return;
+        }
 
         const labelSeção = TRADUCOES[chave] || chave;
         conteudo += `
@@ -591,7 +670,10 @@ export function gerarPDFBoletim(dados) {
         </style>
 
         <div class="conteudo-dinamico">
-            ${gerarConteudoCulto(dados)}
+            ${dados.tipoCulto === "Personalizado"
+                ? gerarConteudoPersonalizado(dados)
+                : gerarConteudoCulto(dados)
+            }
         </div>
     `;
 
@@ -724,9 +806,9 @@ function gerarConteudoCulto(dados) {
         `;
     }
 
-    
+
     if (dados.tipo != "Celebração Dominical - Ceia") {
-            if (dados.edificacao.musicaPos && dados.edificacao.autorPos) {
+        if (dados.edificacao.musicaPos && dados.edificacao.autorPos) {
             html += `
                 <div class="musica-item">
                     <span class="musica-index-alt">MÚSICA PÓS MENSAGEM:</span> ${dados.edificacao.musicaPos || ''} - ${dados.edificacao.autorPos ? `<span class="autor-musica">(${dados.edificacao.autorPos})</span>` : ''}
@@ -763,6 +845,148 @@ function gerarConteudoCulto(dados) {
                 <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA FINAL:</span> ${dados.louvorFinal.musica || ''} - ${dados.louvorFinal.autor ? `<span class="autor-musica">(${dados.louvorFinal.autor})</span>` : ''}
             </div>
         `;
+    }
+
+    return html;
+}
+
+function gerarConteudoPersonalizado(dados) {
+    let html = "";
+    const versao = "NVI";
+    const clave = "&#119070;";
+
+    const dataFormatada = new Date(dados.data + "T12:00:00").toLocaleDateString("pt-BR", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+    });
+
+    html += `
+        <header class="header-pdf">
+            <h1>${dados.tipo || 'CELEBRAÇÃO'}</h1>
+            <p>${dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1)}</p>
+            <span>"Deus é Espírito, e é necessário que os seus adoradores o adorem em espírito e em verdade."</span>
+        </header>
+        <div class="item-culto">
+            <span class="clave">${clave}</span> <span class="titulo-item">PRELÚDIO:</span>
+        </div>
+        <div class="item-culto">
+            <span class="titulo-item">ORAÇÃO:</span><span class="pessoas-identifier">${dados.dirigenteGeral || ''}</span>
+        </div>
+    `;
+
+    if (dados.cronograma && dados.cronograma.length > 0) {
+        dados.cronograma.forEach((item) => {
+            switch (item.tipo) {
+                case "louvor":
+                    item.musicas.forEach((m, idx) => {
+                        if (m.referencia) {
+                            html += `
+                                <div class="item-culto">
+                                    <span class="titulo-item" style="text-decoration: underline;">LEITURA CONGREGACIONAL ${idx + 1}:</span> 
+                                    <span class="referencia-biblica">${m.referencia?.toUpperCase()} <span class="version-identifier">(${versao})</span></span>
+                                    ${m.texto ? `<span class="texto-biblico">${m.texto}</span>` : ''}
+                                </div>
+                            `;
+                        }
+
+                        html += `
+                            <div class="musica-item">
+                                <span class="clave">${clave}</span> 
+                                <span class="musica-index">MÚSICA ${idx + 1}:</span> ${m.musica} - ${m.autor ? `<span class="autor-musica">(${m.autor})</span>` : ''}
+                            </div>
+                        `;
+                    });
+                    break;
+
+                case "leitura":
+                    html += `
+                        <div class="item-culto">
+                            <span class="titulo-item" style="text-decoration: underline;">${item.titulo || 'LEITURA CONGREGACIONAL'}:</span> 
+                            <span class="referencia-biblica">${item.referencia?.toUpperCase()} <span class="version-identifier">(${versao})</span></span>
+                            <span class="texto-biblico">${item.texto || ''}</span>
+                        </div>`;
+                    break;
+
+                case "ceia":
+                    html += `<div class="item-culto" style="margin-top: 5mm;"><span class="titulo-item" style="text-decoration: underline;">${item.titulo}:</span></div>`;
+                    item.musicas.forEach(m => {
+                        html += `
+                            <div class="container-ceia">
+                                <div class="musica-item">
+                                    <span class="musica-index-alt" style="text-decoration: none;">${m.elemento.toUpperCase()}:</span> ${m.musica || ''} - ${m.autor ? `<span class="autor-musica">(${m.autor})</span>` : ''}
+                                </div>
+                            </div>`;
+                    });
+                    break;
+
+                case "ofertas":
+                    html += `
+                        <div class="item-culto">
+                            <span class="titulo-item" style="text-decoration: underline;">ENTREGA DÍZIMOS E OFERTAS:</span> 
+                            <span class="referencia-biblica">${item.referencia?.toUpperCase() || ''} <span class="version-identifier">(${versao})</span></span>
+                            <span class="texto-biblico">${item.texto || ''}</span>
+                        </div>
+                        <div class="musica-item">
+                            <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA:</span> ${item.musica || ''} - ${item.autor ? `<span class="autor-musica">(${item.autor})</span>` : ''}
+                            <span class="second-text">Oração entregando as Ofertas:</span><span class="pessoas-identifier"> ${item.quemOrara || ''}</span>
+                        </div>`;
+                    break;
+
+                case "edificacao":
+                    html += `
+                        <div class="item-culto">
+                            <span class="titulo-item" style="text-decoration: underline; font-size: 1rem;">MOMENTO DE EDIFICAÇÃO DA NOSSA FÉ</span><br>
+                            <span>Mensagem:</span><span class="pessoas-identifier">${item.pregador || ''}</span>
+                        </div>`;
+                    if (item.musicaPos) {
+                        html += `<div class="musica-item">
+                                    <span class="musica-index-alt">MÚSICA PÓS MENSAGEM:</span> ${item.musicaPos || ''} - ${item.autorPos ? `<span class="autor-musica">(${item.autorPos})</span>` : ''}
+                                </div>`;
+                    }
+
+                    if (item.oracaoFinal) {
+                        html += `
+                            <div class="item-culto" style="margin-top: 20px;">
+                                <span class="titulo-item" style="text-decoration: underline;">ORAÇÃO FINAL E BÊNÇÃO:</span> <span class="pessoas-identifier"> ${item.oracaoFinal || ''}</span>
+                            </div>
+                        `;
+                    }
+
+                    if (item.musicaFinal) {
+                        html += `
+                            <div class="musica-item">
+                                <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA FINAL:</span> ${item.musicaFinal || ''} - ${item.autorFinal ? `<span class="autor-musica">(${item.autorFinal})</span>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    break;
+
+                case "intercessao":
+                    html += `
+                        <div class="musica-item">
+                            <span class="clave">${clave}</span> <span class="musica-index-alt"> MÚSICA:</span> ${item.musica || ''} - ${item.autor ? `<span class="autor-musica">(${item.autor})</span>` : ''}
+                            <span class="second-text">Oração Intercessória:</span><span class="pessoas-identifier"> ${item.pessoa || ''}</span>
+                        </div>`;
+                    break;
+
+                case "visitantes":
+                    html += `
+                        <div class="musica-item">
+                            <span class="clave">${clave}</span>
+                            <span class="titulo-item" style="text-decoration: underline;">VISITANTES:</span> 
+                            <span class="nome-pessoa">${item.musica} ${item.autor ? `<span class="autor-musica">(${item.autor})</span>` : ''}</span>
+                        </div>`;
+                    break;
+
+                case "avisos":
+                    html += `
+                        <div class="item-culto">
+                            <span class="titulo-item" style="text-decoration: underline;">AVISOS:</span>
+                            <span class="texto-biblico" style="font-style: normal; color: #000;">${item.texto || ''}</span>
+                        </div>`;
+                    break;
+            }
+        });
     }
 
     return html;

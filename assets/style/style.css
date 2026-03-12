@@ -349,3 +349,21 @@ select:focus {
     font-size: 1.2rem;
     vertical-align: middle;
 }
+
+.visualizacao-personalizado .momento-card {
+    border-left: 4px solid #007bff; /* Uma barra lateral para dar destaque */
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.momento-tipo-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #6c757d;
+    display: block;
+    margin-bottom: 5px;
+}

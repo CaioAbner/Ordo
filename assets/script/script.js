@@ -2,6 +2,7 @@ import { musicas } from "./musicas.js";
 import { buscarMusicas, configurarBuscaBiblica, confirmarTipoCulto, criarCardMusica, criarFormEstrutura, fecharModal, roteiros, configurarPainelOpcoes, mostrarVisualizacao } from "./config.js";
 import { cultoPersonalizado, edificacaoEEncerramento, gerarHtmlBloco, infosInicias, intercessao, leituraCongregacional, louvores, louvoresCeia, visitantesEOfertas } from "./etapas.js";
 import { extratoresDeDados, obterResumoOrdenado } from "./genData.js";
+import { CustomService } from "./customService.js";
 
 const tela = document.querySelector("body");
 const btn_create = document.querySelector("#btn_novo");
@@ -134,12 +135,24 @@ function configurarEventosNavegacao() {
 
     btnProximo.addEventListener("click", () => {
 
-        if (extratoresDeDados[dadosBoletim.etapaAtual]) {
+        if (dadosBoletim.tipoCulto === "Personalizado" && dadosBoletim.etapaAtual === 8) {
+            const cronogramaExtraido = CustomService.extrairCronograma();
+            dadosBoletim.cronograma = cronogramaExtraido;
+            CustomService.salvarProgresso(dadosBoletim);
+        } else if (extratoresDeDados[dadosBoletim.etapaAtual]) {
             Object.assign(dadosBoletim, extratoresDeDados[dadosBoletim.etapaAtual]());
         }
 
-        if (indexAtual === roteiro.length - 1) {            
-            salvarCultoFinalizado();
+        if (indexAtual === roteiro.length - 1) {    
+            if (dadosBoletim.tipoCulto === "Personalizado") {
+                const boletimFinal = CustomService.prepararParaHistorico(dadosBoletim);
+                const historico = JSON.parse(localStorage.getItem("meus_boletins")) || [];
+                historico.push(boletimFinal);
+                localStorage.setItem("meus_boletins", JSON.stringify(historico));
+            } else {
+                salvarCultoFinalizado();
+            }
+
             localStorage.removeItem("boletim_atual");
             alert("Culto salvo com sucesso!");
             location.reload();
@@ -297,6 +310,7 @@ window.criarMomento = (tipo) => {
     const wrapper = document.createElement("div");
     wrapper.className = `card mb-2 shadow-sm border-0 border-start border-3 border-${c.cor}`;
     wrapper.id = `momento-${id}`;
+    wrapper.setAttribute("data-tipo", tipo);
 
     let htmlConteudo = "";
 
@@ -478,7 +492,7 @@ window.gerarCamposCeia = (id) => {
     for (let i = 1; i <= qtd; i++) {
         const itemCeiaId = `${id}-${i}`;
         const div = document.createElement("div");
-        div.className = "p-3 border rounded mb-3 bg-white shadow-sm busca-musica-container position-relative";
+        div.className = "p-3 border rounded mb-3 bg-white shadow-sm busca-musica-container position-relative musica-ceia-item";
 
         div.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="gap: 0.5rem;">

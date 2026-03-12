@@ -1,26 +1,3 @@
-function capturarItensPersonalizados() {
-    const blocos = document.querySelectorAll(".bloco-item-personalizado");
-    const listaFinal = [];
-
-    blocos.forEach(bloco => {
-        const tipo = bloco.dataset.tipo;
-
-        const item = {
-            tipo: tipo,
-            titulo: bloco.querySelector('.input-titulo')?.value || "",
-            musica: bloco.querySelector('.input-musica')?.value || "",
-            autor: bloco.querySelector('.input-autor')?.value || "",
-            referencia: bloco.querySelector('.input-referencia')?.value || "",
-            texto: bloco.querySelector('.input-texto')?.value || "",
-            pregador: bloco.querySelector('.input-pregador')?.value || ""
-        };
-
-        listaFinal.push(item);
-    });
-
-    return listaFinal;
-}
-
 export const extratoresDeDados = {
     1: () => ({
         dataCulto: document.querySelector("#data_input")?.value,
@@ -99,11 +76,6 @@ export const extratoresDeDados = {
             }
         }
     }),
-    8: () => {
-        return {
-            cronograma: capturarItensPersonalizados()
-        };
-    }
 };
 
 export function obterResumoOrdenado(dados) {
@@ -173,23 +145,6 @@ export function obterResumoOrdenado(dados) {
             resumo.oracaoFinal = dados.oracaoFinal;
             if (dados.louvorFinal?.musica) resumo.louvorFinal = dados.louvorFinal;
         }
-    } else if (dados.tipoCulto === "Personalizado") {
-        const tipoParaExibir = (dados.nomeEvento && dados.nomeEvento.trim() !== "")
-                ? dados.nomeEvento
-                : "Culto Personalizado";
-
-        return {
-            id: dados.id || Date.now(),
-            tipo: tipoParaExibir,
-            tipoOriginal: "Personalizado",
-            data: dados.dataCulto || dados.data,
-            dirigenteGeral: dados.dirigenteGeral,
-            momentos: capturarItensPersonalizados()
-        };
-    }
-
-    if (dados.oracaoFinal) {
-        resumo.oracaoFinal = dados.oracaoFinal;
     }
 
     return resumo;
