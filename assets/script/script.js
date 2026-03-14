@@ -420,6 +420,7 @@ window.criarMomento = (tipo) => {
 
     wrapper.innerHTML = `
             <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pb-0">
+            <i class='bx bx-menu drag-handle'></i>
                 <div class="d-flex align-items-center gap-2">
                     <i class='bx ${c.icone} text-${c.cor} fs-5'></i>
                     <input type="text" class="form-control form-control-sm border-0 fw-bold p-0 input-titulo-momento" placeholder="${c.label}">
@@ -435,6 +436,7 @@ window.criarMomento = (tipo) => {
         `;
 
     container.appendChild(wrapper);
+    ativarOrdenacaoMomentos();
     configurarBuscaBiblica(wrapper);
     buscarMusicas(wrapper, musicas);
 };
@@ -521,3 +523,18 @@ window.abrirSeletorModulos = () => {
 
 window.criarMomento = criarMomento;
 window.adicionarNovoBloco = adicionarNovoBloco;
+
+function ativarOrdenacaoMomentos() {
+    const container = document.querySelector("#container-momentos");
+
+    if (!container) return;
+
+    new Sortable(container, {
+        animation: 200,
+        ghostClass: "drag-ghost",
+        chosenClass: "drag-chosen",
+        dragClass: "drag-dragging",
+        handle: ".drag-handle"
+    });
+
+}

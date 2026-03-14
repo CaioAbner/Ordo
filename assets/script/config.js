@@ -256,7 +256,7 @@ export function configurarPainelOpcoes(id, callbacks) {
     const overlay = document.querySelector("#overlay");
     const btnDelete = document.querySelector("#btn-delete-sheet");
     const btnView = document.querySelector("#btn-view");
-    const btnPdf = document.querySelector("#btn-pdf-sheet");;
+    const btnPdf = document.querySelector("#btn-pdf-sheet");
 
     const handle = document.querySelector(".sheet-handle");
 
@@ -615,10 +615,9 @@ export function gerarPDFBoletim(dados) {
             .folha-pdf {
                 width: 297mm;
                 height: 210mm;
-                padding-top: 8mm;
-                padding-left: 12mm;
-                padding-right: 12mm;
-                padding-bottom: 8mm;
+                padding: 8mm 12mm;
+                margin: 0;
+                overflow: hidden;
                 box-sizing: border-box;
                 font-family: 'Arial', sans-serif;
                 background: white;
@@ -626,6 +625,10 @@ export function gerarPDFBoletim(dados) {
                 column-gap: 15mm;
                 column-rule: 1px solid #ddd;
                 column-fill: auto;
+            }
+
+            .item-culto:last-child, .musica-item:last-child {
+                margin-bottom: 0 !important;
             }
 
             /* Cabeçalho centralizado atravessando as colunas */
@@ -689,8 +692,9 @@ export function gerarPDFBoletim(dados) {
         margin: 0,
         filename: `CULTO-DO-DIA-${dia}-DE-${mesNome}-DE-${ano}.pdf`,
         image: { type: "jpeg", quality: 1 },
-        html2canvas: { scale: 3, useCORS: true, width: 1122.52, height: 793.70 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        pagebreak: { mode: 'css' }
     };
 
     html2pdf().set(opt).from(areaImpressao).save();

@@ -310,14 +310,21 @@ select:focus {
     border-radius: 10px;
 }
 
+.sheet-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
 .sheet-item {
     width: 100%;
     border: none;
     background: none;
-    padding: 15px;
+    padding: 15px 0px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    border-radius: 0.3rem;
+    gap: 10px;
     font-size: 1.1rem;
 }
 
@@ -339,15 +346,8 @@ select:focus {
     right: 5px !important;
 }
 
-#btn-pdf-sheet {
-    border: 1px solid #ff000033;
-    background-color: #fff5f5;
-    font-weight: 600;
-}
-
 #btn-pdf-sheet i {
     font-size: 1.2rem;
-    vertical-align: middle;
 }
 
 .visualizacao-personalizado .momento-card {
@@ -366,4 +366,28 @@ select:focus {
     color: #6c757d;
     display: block;
     margin-bottom: 5px;
+}
+
+.drag-ghost {
+    opacity: 0.4;
+}
+
+.drag-chosen {
+    transform: scale(1.02);
+}
+
+.drag-dragging {
+    cursor: grabbing;
+}
+
+@media print {
+    .visualizacao-full {
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Esconde elementos que não devem sair no PDF */
+    .header-view, #btn-fechar-view, .bottom-sheet, .modal {
+        display: none !important;
+    }
 }

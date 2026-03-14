@@ -104,7 +104,7 @@ export const CustomService = {
     },
 
     prepararParaHistorico: (dadosBoletim) => {
-        const nomeTipo = document.querySelector("#nome-culto-custom")?.value || "Culto Personalizado";
+        const nomeTipo = document.querySelector("#nome-culto-personalizado")?.value || "Culto Personalizado";
         
         return {
             id: dadosBoletim.id || Date.now(),
