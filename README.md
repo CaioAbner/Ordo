@@ -99,11 +99,13 @@ cd Ordo
 
 A aplicação está disponível em produção no seguinte endereço:
 
-https://ordo-app-gold.vercel.app
+<a href="https://ordo-app-gold.vercel.app" target="_blank">
+  https://ordo-app-gold.vercel.app
+</a>
 
 ou
 
-<a href="[https://ordo-387r8qu7f-caioabners-projects.vercel.app](https://ordo-app-gold.vercel.app)">
+<a href="https://ordo-app-gold.vercel.app" target="_blank">
   <img src="https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel">
 </a>
 
