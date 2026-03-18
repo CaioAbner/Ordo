@@ -95,6 +95,20 @@ cd Ordo
 
 ---
 
+## Aplicação Online
+
+A aplicação está disponível em produção no seguinte endereço:
+
+https://ordo-app-gold.vercel.app
+
+ou
+
+<a href="[https://ordo-387r8qu7f-caioabners-projects.vercel.app](https://ordo-app-gold.vercel.app)">
+  <img src="https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel">
+</a>
+
+---
+
 
 ## Autor
 
