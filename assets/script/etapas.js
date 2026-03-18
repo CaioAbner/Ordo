@@ -92,7 +92,7 @@ export function leituraCongregacional(dados) {
         <div class="mb-3">
             <label class="form-label fw-semibold">Referência Bíblica</label>
             <div class="input-group mb-2">
-                <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control referencia-biblica-input" data-index="leitura" id="ref_leitura" class="form-control" 
+                <input required type="text" class="form-control referencia-biblica-input" data-index="leitura" id="ref_leitura" class="form-control" 
                     placeholder="Ex: Salmos 23:1-6" value="${dados.leituraCongregacional.referencia}">
                 <button class="btn btn-primary btn-buscar-ref" data-index="leitura" id="btn_buscar_leitura" type="button">
                     <i class='bx bx-search'></i>
@@ -136,7 +136,7 @@ export function visitantesEOfertas(dados) {
                 
                 <label class="form-label small fw-semibold">Referência Bíblica</label>
                 <div class="input-group mb-2">
-                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control referencia-biblica-input" 
+                    <input required type="text" class="form-control referencia-biblica-input" 
                         data-index="ofertas" id="ref_ofertas" 
                         placeholder="Ex: 2 Coríntios 9:7" value="${dados.ofertas?.referencia || ''}">
                     <button class="btn btn-success btn-buscar-ref" data-index="ofertas" type="button">
@@ -268,7 +268,7 @@ export function cultoPersonalizado(dados) {
         <div class="p-3">
             <div class="mb-4">
                 <label class="form-label fw-bold">Nome do Culto / Evento</label>
-                <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="nome-culto-personalizado" class="form-control" 
+                <input required type="text" id="nome-culto-personalizado" class="form-control" 
                        placeholder="Ex: Congresso Identidade" value="${dados.nomePersonalizado || ''}">
             </div>
 
@@ -340,8 +340,8 @@ export function gerarHtmlBloco(tipo) {
                     <input type="text" required class="form-control form-control-sm mb-1 oracao-final-input" placeholder="Oração Final">
                     
                     <div class="busca-musica-container" style="position: relative;">
-                        <input type="text" required class="form-control form-control-sm mb-1 louvor-item musica-final-input" placeholder="Música Final">
-                        <input type="text" required class="form-control form-control-sm autor-louvor-item" placeholder="Autor música final">
+                        <input type="text" class="form-control form-control-sm mb-1 louvor-item musica-final-input" placeholder="Música Final">
+                        <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor música final">
                     </div>
                 ` : ''}
             </div>
