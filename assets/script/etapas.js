@@ -1,16 +1,26 @@
 export function infosInicias(dados) {
     return `
+
+        <div class="d-flex justify-content-start w-100 mb-4">
+            <button class="btn btn-sm btn-light text-muted border d-flex align-items-center gap-1" 
+                    onclick="window.location.href='index.html'" 
+                    style="font-size: 0.75rem; border-radius: 8px; padding: 5px 10px;"
+                    title="Clique aqui para voltar para a página inicial">
+                <i class='bx bx-home-alt'></i> Sair
+            </button>
+        </div>
+
         <div class="text-center">
             <h4 class="fw-bold">Informações Iniciais</h4>
             <span class="badge bg-primary-subtle text-primary mb-3">${dados.tipoCulto}</span>
         </div>
         <div class="mb-3">
             <label class="form-label fw-semibold">Data do Culto</label>
-            <input type="date" id="data_input" class="form-control" value="${dados.dataCulto}">
+            <input required type="date" id="data_input" class="form-control" value="${dados.dataCulto}">
         </div>
         <div class="mb-3">
             <label class="form-label fw-semibold">Dirigente do Culto</label>
-            <input type="text" id="dirigente_input" class="form-control" placeholder="Ex: Ir. Fulano / Pr. João" value="${dados.dirigenteGeral}">
+            <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="dirigente_input" class="form-control" placeholder="Ex: Ir. Fulano / Pr. João" value="${dados.dirigenteGeral}">
         </div>`;
 }
 
@@ -22,13 +32,13 @@ export function louvores(dados) {
         </div>
         <div class="mb-3 p-3 bg-light rounded border-start border-primary border-4">
             <label class="form-label fw-semibold">Dirigente do Louvor</label>
-            <input type="text" id="dirigente_louvor" class="form-control" 
+            <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="dirigente_louvor" class="form-control" 
                 placeholder="Ex: Júnior / Cléber" 
                 value="${dados.dirigenteLouvor || ''}">
         </div>
         <div class="mb-3">
             <label class="form-label fw-semibold">Quantos louvores?</label>
-            <input type="number" id="qtd_louvores" class="form-control mb-3" 
+            <input required type="number" id="qtd_louvores" class="form-control mb-3" 
                 placeholder="Ex: 3" value="${dados.louvoresAbertura.length > 0 ? dados.louvoresAbertura.length : ''}">
         </div>
         <div id="lista_inputs_louvores" class="d-flex flex-column gap-2"></div>
@@ -64,10 +74,10 @@ export function louvoresCeia(dados) {
 function componenteMusicaBasico(id, valor) {
     return `
         <div class="busca-musica-container" style="position: relative;">
-            <input type="text" class="form-control louvor-item mb-1" 
+            <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control louvor-item mb-1" 
                 data-index="${id}" placeholder="Nome da música" value="${valor?.musica || ''}">
             <ul id="sugestoes-musica-${id}" class="list-group lista-sugestoes" style="display: none;"></ul>
-            <input type="text" class="form-control autor-louvor-item" 
+            <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control autor-louvor-item" 
                 placeholder="Autor" value="${valor?.autor || ''}">
         </div>
     `;
@@ -82,7 +92,7 @@ export function leituraCongregacional(dados) {
         <div class="mb-3">
             <label class="form-label fw-semibold">Referência Bíblica</label>
             <div class="input-group mb-2">
-                <input type="text" class="form-control referencia-biblica-input" data-index="leitura" id="ref_leitura" class="form-control" 
+                <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control referencia-biblica-input" data-index="leitura" id="ref_leitura" class="form-control" 
                     placeholder="Ex: Salmos 23:1-6" value="${dados.leituraCongregacional.referencia}">
                 <button class="btn btn-primary btn-buscar-ref" data-index="leitura" id="btn_buscar_leitura" type="button">
                     <i class='bx bx-search'></i>
@@ -108,13 +118,13 @@ export function visitantesEOfertas(dados) {
                   <h6 class="fw-bold text-primary mb-3"><i class='bx bx-group'></i> Visitantes</h6>
                 <div class="busca-musica-container" style="position: relative;">
                     <label class="form-label small fw-semibold">Música de Boas-vindas</label>
-                    <input type="text" id="musica_visitante" class="form-control louvor-item mb-2" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="musica_visitante" class="form-control louvor-item mb-2" 
                         data-index="visitantes" placeholder="Nome da música" 
                         value="${dados.visitantes?.musica || ''}">
                     <ul id="sugestoes-musica-visitantes" class="list-group lista-sugestoes" 
                         style="position: absolute; z-index: 1000; width: 100%; display: none;"></ul>
                     
-                    <input type="text" id="autor_visitante" class="form-control autor-louvor-item" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="autor_visitante" class="form-control autor-louvor-item" 
                         placeholder="Autor" value="${dados.visitantes?.autor || ''}">
                 </div>
             </div>
@@ -126,7 +136,7 @@ export function visitantesEOfertas(dados) {
                 
                 <label class="form-label small fw-semibold">Referência Bíblica</label>
                 <div class="input-group mb-2">
-                    <input type="text" class="form-control referencia-biblica-input" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" class="form-control referencia-biblica-input" 
                         data-index="ofertas" id="ref_ofertas" 
                         placeholder="Ex: 2 Coríntios 9:7" value="${dados.ofertas?.referencia || ''}">
                     <button class="btn btn-success btn-buscar-ref" data-index="ofertas" type="button">
@@ -139,19 +149,19 @@ export function visitantesEOfertas(dados) {
 
                 <div class="busca-musica-container" style="position: relative;">
                     <label class="form-label small fw-semibold">Música do Ofertório</label>
-                    <input type="text" id="musica_ofertas" class="form-control louvor-item mb-2" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="musica_ofertas" class="form-control louvor-item mb-2" 
                         data-index="ofertas" placeholder="Música da oferta" 
                         value="${dados.ofertas?.musica || ''}">
                     <ul id="sugestoes-musica-ofertas" class="list-group lista-sugestoes" 
                         style="position: absolute; z-index: 1000; width: 100%; display: none;"></ul>
                     
-                    <input type="text" id="autor_ofertas" class="form-control autor-louvor-item" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="autor_ofertas" class="form-control autor-louvor-item" 
                         placeholder="Autor" value="${dados.ofertas?.autor || ''}">
                 </div>
 
                 <div class="mt-3 pt-3 border-top">
                     <label class="form-label small fw-semibold text-success">Oração pelas Ofertas</label>
-                    <input type="text" id="oracao_ofertas" class="form-control" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="oracao_ofertas" class="form-control" 
                         placeholder="Nome do irmão que fará a oração.." 
                         value="${dados.ofertas?.oracaoOfertas || ''}">
                 </div>
@@ -175,6 +185,8 @@ export function intercessao(dados) {
                            class="form-control louvor-item mb-1" 
                            data-index="${index}"
                            placeholder="Nome da música" 
+                           required
+                           oninput="this.value = this.value.replace(/[0-9]/g, '')"
                            value="${dados.intercessao?.musica || ''}" />
                     
                     <ul id="sugestoes-musica-${index}" class="list-group lista-sugestoes"
@@ -183,13 +195,15 @@ export function intercessao(dados) {
                     <input type="text" id="autor_intercessao" 
                            class="form-control autor-louvor-item" 
                            placeholder="Autor/Banda" 
+                           required
+                           oninput="this.value = this.value.replace(/[0-9]/g, '')"
                            value="${dados.intercessao?.autor || ''}" />
                 </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label small fw-bold text-primary">Oração Intercessória</label>
-                <input type="text" id="intercessor_input" class="form-control" 
+                <input requerid oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="intercessor_input" class="form-control" 
                        value="${dados.intercessao?.quemOrara || ''}" placeholder="Quem fará a oração?">
             </div>
         </div>
@@ -208,18 +222,18 @@ export function edificacaoEEncerramento(dados) {
                 <h6 class="fw-bold text-primary mb-3"><i class='bx bx-book-bookmark'></i> Edificação da nossa fé</h6>
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Pregador (Mensagem)</label>
-                    <input type="text" id="pregador_input" class="form-control" 
-                        placeholder="Ex: Ir. Rubem Alves" value="${dados.edificacao?.pregador || ''}">
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="pregador_input" class="form-control" 
+                        placeholder="Ex: Ir. Fulano" value="${dados.edificacao?.pregador || ''}">
                 </div>
                 
                 <div class="busca-musica-container" style="position: relative;">
                     <label class="form-label small fw-semibold">Música Pós-Mensagem</label>
-                    <input type="text" id="musica_pos_mensagem" class="form-control louvor-item mb-1" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="musica_pos_mensagem" class="form-control louvor-item mb-1" 
                         data-index="pos_mensagem" placeholder="Nome da música" 
                         value="${dados.edificacao?.musicaPos || ''}">
                     <ul id="sugestoes-musica-pos_mensagem" class="list-group lista-sugestoes" 
                         style="position: absolute; z-index: 1000; width: 100%; display: none;"></ul>
-                    <input type="text" id="autor_pos_mensagem" class="form-control autor-louvor-item" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="autor_pos_mensagem" class="form-control autor-louvor-item" 
                         placeholder="Autor" value="${dados.edificacao?.autorPos || ''}">
                 </div>
             </div>
@@ -230,18 +244,18 @@ export function edificacaoEEncerramento(dados) {
                 <h6 class="fw-bold text-primary mb-3"><i class='bx bx-church'></i> Oração final e benção</h6>
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Responsável pela Bênção</label>
-                    <input type="text" id="bencao_input" class="form-control" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="bencao_input" class="form-control" 
                         placeholder="Ex: Pr. Etevaldo" value="${dados.oracaoFinal || ''}">
                 </div>
 
                 <div class="busca-musica-container" style="position: relative;">
                     <label class="form-label small fw-semibold">Música Final</label>
-                    <input type="text" id="musica_final" class="form-control louvor-item mb-1" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="musica_final" class="form-control louvor-item mb-1" 
                         data-index="final" placeholder="Ex: A Bênção" 
                         value="${dados.louvorFinal?.musica || ''}">
                     <ul id="sugestoes-musica-final" class="list-group lista-sugestoes" 
                         style="position: absolute; z-index: 1000; width: 100%; display: none;"></ul>
-                    <input type="text" id="autor_final" class="form-control autor-louvor-item" 
+                    <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="autor_final" class="form-control autor-louvor-item" 
                         placeholder="Autor" value="${dados.louvorFinal?.autor || ''}">
                 </div>
             </div>
@@ -254,7 +268,7 @@ export function cultoPersonalizado(dados) {
         <div class="p-3">
             <div class="mb-4">
                 <label class="form-label fw-bold">Nome do Culto / Evento</label>
-                <input type="text" id="nome-culto-personalizado" class="form-control" 
+                <input required oninput="this.value = this.value.replace(/[0-9]/g, '')" type="text" id="nome-culto-personalizado" class="form-control" 
                        placeholder="Ex: Congresso Identidade" value="${dados.nomePersonalizado || ''}">
             </div>
 
@@ -304,30 +318,30 @@ export function gerarHtmlBloco(tipo) {
                 <input type="text" class="form-control form-control-sm mb-2 input-titulo" placeholder="Título opcional">
                 
                 ${tipo === 'louvor' ? `
-                    <input type="text" class="form-control form-control-sm mb-1 louvor-item" placeholder="Nome da música">
-                    <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor">
+                    <input type="text" required class="form-control form-control-sm mb-1 louvor-item" placeholder="Nome da música">
+                    <input type="text" required class="form-control form-control-sm autor-louvor-item" placeholder="Autor">
                 ` : ''}
 
                 ${tipo === 'leitura' ? `
                     <div class="input-group input-group-sm mb-1">
-                        <input type="text" class="form-control referencia-biblica-input" placeholder="Ex: Salmos 23">
+                        <input type="text" required class="form-control referencia-biblica-input" placeholder="Ex: Salmos 23">
                         <button class="btn btn-outline-secondary btn-buscar-ref" type="button"><i class='bx bx-search'></i></button>
                     </div>
                     <div class="small text-muted p-2 bg-light rounded preview-ref">Versículos aparecerão aqui...</div>
                 ` : ''}
 
                 ${tipo === 'edificacao' ? `
-                    <input type="text" class="form-control form-control-sm mb-1 pregador-input" placeholder="Nome do Pregador">
+                    <input type="text" required oninput="this.value = this.value.replace(/[0-9]/g, '')" class="form-control form-control-sm mb-1 pregador-input" placeholder="Nome do Pregador">
                     <div class="busca-musica-container" style="position: relative;">
                         <input type="text" class="form-control form-control-sm mb-1 louvor-item musica-pos-input" placeholder="Música pós mensagem">
                         <input type="text" class="form-control form-control-sm mb-1 autor-louvor-item" placeholder="Autor música pós">
                     </div>
 
-                    <input type="text" class="form-control form-control-sm mb-1 oracao-final-input" placeholder="Oração Final">
+                    <input type="text" required class="form-control form-control-sm mb-1 oracao-final-input" placeholder="Oração Final">
                     
                     <div class="busca-musica-container" style="position: relative;">
-                        <input type="text" class="form-control form-control-sm mb-1 louvor-item musica-final-input" placeholder="Música Final">
-                        <input type="text" class="form-control form-control-sm autor-louvor-item" placeholder="Autor música final">
+                        <input type="text" required class="form-control form-control-sm mb-1 louvor-item musica-final-input" placeholder="Música Final">
+                        <input type="text" required class="form-control form-control-sm autor-louvor-item" placeholder="Autor música final">
                     </div>
                 ` : ''}
             </div>

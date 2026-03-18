@@ -316,6 +316,13 @@ window.criarMomento = (tipo) => {
 
     if (tipo === "louvor") {
         htmlConteudo = `
+        <div class="mb-3">
+            <label for="dirigenteLouvor" class="form-label fw-bold">Dirigente de Louvor</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class='bx bx-user-voice'></i></span>
+                <input type="text" id="dirigenteLouvor" class="form-control border-start-0" placeholder="Nome do dirigente do louvor">
+            </div>
+        </div>
             <div id="lista-musicas-${id}">
                 <div class="musica-personalizada-item">
                     ${criarCardMusica(1, { referencia: "", musica: "", autor: "" })}

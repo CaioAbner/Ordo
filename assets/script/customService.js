@@ -20,6 +20,8 @@ export const CustomService = {
             switch (tipo) {
                 case "louvor":  
                     const musicas = [];
+
+                    const dirigenteLouvor = document.querySelector("#dirigenteLouvor")?.value || ""
                     bloco.querySelectorAll(".musica-personalizada-item").forEach((item, index) => {
                         const previewTexto = item.querySelector(`[id^="preview-ref-"]`)?.innerHTML || "";
                         musicas.push({
@@ -30,6 +32,7 @@ export const CustomService = {
                         });
                     });
                     dadosMomento.musicas = musicas;
+                    dadosMomento.dirigenteLouvor = dirigenteLouvor;
                     break;
                 
                 case "leitura":

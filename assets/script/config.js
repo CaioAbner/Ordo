@@ -450,6 +450,7 @@ function formatarMomentoPersonalizado(item) {
             item.musicas?.forEach(m => {
                 html += gerarCardPadrao("Música", m.musica, m.autor, m.referencia, m.texto);
             });
+            if (item.dirigenteLouvor) html += gerarCardPadrao("Dirigente do louvor", item.dirigenteLouvor);
             break;
 
         case "leitura":
@@ -898,6 +899,15 @@ function gerarConteudoPersonalizado(dados) {
                                 <span class="musica-index">MÚSICA ${idx + 1}:</span> ${m.musica} - ${m.autor ? `<span class="autor-musica">(${m.autor})</span>` : ''}
                             </div>
                         `;
+
+                    if (item.dirigenteLouvor) {
+                        html += `
+                            <div class="item-culto">
+                                <span class="titulo-item">ORAÇÃO DE LOUVOR:</span>
+                                <span class="pessoas-identifier">${item.dirigenteLouvor}</span>
+                            </div>
+                        `;
+                    }
                     });
                     break;
 
