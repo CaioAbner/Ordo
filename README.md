@@ -55,12 +55,10 @@ A proposta é oferecer uma ferramenta simples, mas poderosa, para igrejas e mini
 
 ```text
 Ordo/
+├── index.html
 │
 ├── assets/
-│   ├── images/
-│   └── pages/
-│       └── index.html
-│
+│   └── images/
 │
 ├── script/
 │   ├── bibleService.js
