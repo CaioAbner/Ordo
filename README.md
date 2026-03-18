@@ -1,50 +1,87 @@
-<h1 align="center">📖 Ordo</h1>
+<h1 align="center">Ordo</h1>
 
 <p align="center">
-  <strong>Aplicação web para criação de boletins de culto de forma simples e intuitiva.</strong>
+  Aplicação web feita para a criação de boletins de culto de forma simples e intuitiva.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/languages/top/CaioAbner/Ordo?color=6C63FF">
-  <img src="https://img.shields.io/github/repo-size/CaioAbner/Ordo">
-  <img src="https://img.shields.io/github/last-commit/CaioAbner/Ordo">
-  <img src="https://img.shields.io/github/license/CaioAbner/Ordo">
+  <img src="https://img.shields.io/github/languages/top/CaioAbner/Ordo?style=for-the-badge">
+  <img src="https://img.shields.io/github/repo-size/CaioAbner/Ordo?style=for-the-badge">
+  <img src="https://img.shields.io/github/last-commit/CaioAbner/Ordo?style=for-the-badge">
+  <img src="https://img.shields.io/github/license/CaioAbner/Ordo?style=for-the-badge">
 </p>
 
----
-
-## 📌 Sobre o Projeto
-
-O **Ordo** é uma aplicação web desenvolvida com o objetivo de facilitar a criação de **boletins de culto personalizados**, permitindo organizar programações litúrgicas de forma prática, organizada e moderna.
-
-A proposta é oferecer uma ferramenta simples, mas poderosa, para igrejas e equipes de louvor.
+<br>
 
 ---
 
-## 🚀 Funcionalidades
+## Sobre o Ordo
 
-- 📝 Criação de boletins personalizados
-- 🎨 Interface simples e intuitiva
-- 🗂️ Organização estruturada do culto
-- ⚡ Edição rápida de conteúdo
+O **Ordo** é uma aplicação web desenvolvida com o objetivo de facilitar a criação de **boletins de culto (padrões e personalizados)**, permitindo organizar programações litúrgicas de forma prática, organizada e moderna.
 
----
-
-## 🛠️ Tecnologias Utilizadas
-
-<div align="center">
-
-| Tecnologia | Uso |
-|------------|------|
-| HTML5 | Estrutura da aplicação |
-| CSS3 | Estilização |
-| JavaScript | Lógica e interatividade |
-
-</div>
+A proposta é oferecer uma ferramenta simples, mas poderosa, para igrejas e ministérios de louvor.
 
 ---
 
-## 💻 Como Executar o Projeto
+## Funcionalidades
+
+- Criação de boletins padrões e personalizados  
+- Interface simples e intuitiva  
+- Organização estruturada do culto  
+- Edição rápida de conteúdo  
+
+---
+
+## Tecnologias Utilizadas
+
+<table align="center">
+  <tr>
+    <td><strong>HTML5</strong></td>
+    <td>Estrutura da aplicação</td>
+  </tr>
+  <tr>
+    <td><strong>CSS3</strong></td>
+    <td>Estilização</td>
+  </tr>
+  <tr>
+    <td><strong>JavaScript</strong></td>
+    <td>Lógica e interatividade</td>
+  </tr>
+</table>
+
+---
+
+## Estrutura de Pastas
+
+```text
+Ordo/
+│
+├── assets/
+│   ├── images/
+│   └── pages/
+│       └── index.html
+│
+│
+├── script/
+│   ├── bibleService.js
+│   ├── config.js
+│   ├── customService.js
+│   ├── etapas.js
+│   ├── genData.js
+│   ├── musicas.js
+│   ├── script.js
+│   ├── splashScreen.js
+│   └── templates.js
+│
+├── style/
+│   └── style.css
+│
+└── README.md
+```
+
+---
+
+## Como Executar o Projeto
 
 ```bash
 # Clone o repositório
@@ -52,3 +89,19 @@ git clone https://github.com/CaioAbner/Ordo.git
 
 # Acesse a pasta
 cd Ordo
+
+# Depois basta instalar a extensão Live Server no VS Code e executar o arquivo index.html
+```
+
+---
+
+
+## Autor
+
+Desenvolvido por **Caio Abner de Oliveira Santos**.
+
+---
+
+## Conclusão
+
+Minha esperança é que esse projeto cresça cada vez mais, que seja uma bênção para diversas congregações. Agradeço a Deus, glória somente a Ele.
